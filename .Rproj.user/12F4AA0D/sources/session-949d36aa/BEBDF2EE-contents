@@ -73,17 +73,21 @@ assign_guild_ants <- function(comm) {
   cat("taxon was not found in the available reference databases.\n\n")
 
   cat("Guild classification in this analysis follows:\n")
-  cat("- Literature-based criteria from:\n")
-  cat("  Silvestre, R., Brandão, C. R. F., & Silva, R. R. (2003).\n")
-  cat("  Functional groups of ants: the case of Cerrado guilds.\n")
-  cat("  In F. Fernández (Ed.), Introduction to the ants of the tropical region (pp. 113–148).\n\n")
+  cat("- Literature-based criteria from:\n\n")
 
-  cat("  Silva, R. R., Silvestre, R., Brandão, C. R. F., Morini, M. S. C., & Delabie, J. H. C. (2015).\n")
-  cat("  Trophic groups and guilds in poneromorph ants. Sociobiology, 62(3), 321–329.\n\n")
+  cat("  Silvestre, R., Brandão, C. R. F., & Silva, R. R. (2003). ")
+  cat("Grupos funcionales de hormigas: el caso de los gremios del Cerrado. ")
+  cat("In F. Fernández (Ed.), *Introducción a las Hormigas de las Región Neotropical* ")
+  cat("(pp. 113–148). Instituto Alexander Von Humboldt.\n\n")
 
-  cat("  Delabie, J. H. C., Agosti, D., & Nascimento, I. C. (2000).\n")
-  cat("  Litter ant communities of the Brazilian Atlantic rain forest:\n")
-  cat("  a comparison of two methodologies. Revista Brasileira de Entomologia, 44(1/2), 1–10.\n\n")
+  cat("  Silva, R. R., Silvestre, R., Brandão, C. R. F., Morini, M. S. C., & Delabie, J. H. C. (2015). ")
+  cat("Trophic groups and guilds in poneromorph ants. ")
+  cat("*Sociobiology*, 62(3), 321–329.\n\n")
+
+  cat("  Delabie, J. H. C., Agosti, D., & Nascimento, I. C. (2000). ")
+  cat("Litter ant communities of the Brazilian Atlantic rain forest region. ")
+  cat("*Sampling Ground-dwelling Ants: case studies from the world’s rain forests. ")
+  cat("Curtin University of Technology School of Environmental Biology Bulletin*, v. 18.\n\n")
 
   cat("- The 'AntClassify Guilds' classification corresponds to the internal\n")
   cat("  classification system implemented in the AntClassify package.\n")

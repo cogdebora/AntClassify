@@ -80,11 +80,12 @@ If you use AntClassify in your research, please cite the following references:
 
 - Vieira, V. B. (2024). *Quem são e onde estão as formigas exóticas do Brasil?* [Dissertação de Mestrado, Universidade Federal do Paraná]. Curitiba, PR, Brasil.
 
-- Silvestre, R., Brandão, C. R. F., & Silva, R. R. (2003). Grupos funcionais de formigas: o caso das guildas do Cerrado. In F. Fernández (Ed.), *Introdução às formigas da região tropical* (pp. 113–148). Instituto Alexander Von Humboldt.
+- Silvestre, R., Brandão, C. R. F., & Silva, R. R. (2003). Grupos funcionales de hormigas: el caso de los gremios del Cerrado. In F. Fernández (Ed.), *Introducción a las Hormigas de las Región Neotropical* (pp. 113–148). Instituto Alexander Von Humboldt.
 
 - Silva, R. R., Silvestre, R., Brandão, C. R. F., Morini, M. S. C., & Delabie, J. H. C. (2015). Trophic groups and guilds in poneromorph ants. *Sociobiology*, 62(3), 321–329.
 
-- Delabie, J. H. C., Agosti, D., & Nascimento, I. C. (2000). Litter ant communities of the Brazilian Atlantic rain forest: a comparison of two methodologies. *Revista Brasileira de Entomologia*, 44(1/2), 1–10.
+- Delabie, J. H. C., Agosti, D., & Nascimento, I. C. (2000). Litter ant communities of the Brazilian Atlantic rain
+forest region. *Sampling Ground-dwelling Ants: case studies from the world’s rain forests. Curtin University of Technology School of Environmental Biology Bulletin*,v. 18.
 
 Additionally, if you use the package itself, please cite:
 

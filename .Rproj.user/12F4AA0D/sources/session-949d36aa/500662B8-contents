@@ -116,9 +116,9 @@ check_rarity_atlantic_ants <- function(comm) {
   cat("Biological Conservation, 296, 110640.\n")
   cat("********************************************************************************\n")
 
- 
+
   print(p1)
 
-  
+
   return(invisible(list(table = raras_detectadas, plot = p1)))
 }

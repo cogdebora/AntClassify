@@ -4,16 +4,17 @@
 #' @export
 check_rarity_atlantic_ants <- function(comm) {
 
-  # --- BIOME WARNING ---
-  cat("\n================================================================================\n")
-  cat("ATTENTION: This function identifies RARITY FORMS specific to the ATLANTIC FOREST.\n")
-  cat("This classification is based on geographic range, habitat specificity, and \n")
-  cat("local abundance. If your data is from another biome, use with caution.\n")
-  cat("================================================================================\n\n")
+  # --- WARNING ---
+  cat("\n********************************************************************************\n")
+  cat("ATTENTION:\n")
+  cat("This function identifies rare ant species and their rarity forms.\n")
+  cat("This classification is specific to the Brazilian Atlantic Forest and\n")
+  cat("may not be appropriate for other biomes.\n")
+  cat("********************************************************************************\n\n")
 
   message("Step 1: Preparing community data and rarity database...")
 
-  # Base de dados de raridade (Silva et al. 2024)
+  # (Silva et al. 2024)
   rarity_db <- data.frame(
     species = c(
       "Acanthoponera mucronata", "Acropyga guianensis", "Alfaria minuta", "Brachymyrmex coactus",
@@ -115,9 +116,9 @@ check_rarity_atlantic_ants <- function(comm) {
   cat("Biological Conservation, 296, 110640.\n")
   cat("********************************************************************************\n")
 
-  # Exibição do gráfico
+
   print(p1)
 
-  # Retorno da tabela filtrada (5 espécies no seu teste)
+
   return(invisible(list(table = raras_detectadas, plot = p1)))
 }
