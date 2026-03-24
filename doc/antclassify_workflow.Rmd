@@ -1,0 +1,94 @@
+---
+title: "antclassify_workflow"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{antclassify_workflow}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(AntClassify)
+```
+
+## Introduction
+
+The **AntClassify** package provides an integrated ecological pipeline to classify ant communities into functional guilds, identify exotic species, detect endemic and rare species of the Atlantic Forest, and quantify key ecological patterns.
+
+This tool was developed to facilitate ecological analyses, standardize functional classification, and improve reproducibility in ant community studies. By integrating multiple ecological databases into a single workflow, AntClassify allows researchers to efficiently assess community structure, biological invasions, endemism, and rarity patterns.
+
+The package is particularly useful for biodiversity monitoring, conservation planning, and macroecological research involving ant assemblages.
+
+AntClassify aims to provide a standardized and reproducible framework for advancing ecological research on ant communities.
+
+## Example dataset
+
+To demonstrate the functionality of the package, we create a more realistic ant community dataset.
+
+```{r}
+dados <- data.frame(
+  Atta_sexdens = 50,
+  Camponotus_atriceps = 40,
+  Crematogaster_sp = 35,
+  Cyphomyrmex_minutus = 30,
+  Cyphomyrmex_rimosus = 28,
+  Ectatomma_edentatum = 25,
+  Heteroponera_mayri = 22,
+  Holcoponera_striatula = 20,
+  Monomorium_floricola = 18,
+  Monomorium_pharaonis = 17,
+  Pheidole_megacephala = 16,
+  Strumigenys_emmae = 15,
+  Strumigenys_rogeri = 14,
+  Nylanderia_fulva = 13,
+  Odontomachus_chelifer = 12,
+  Oxyepoecus_reticulatus = 11,
+  Pachycondyla_striata = 10,
+  Apterostigma_serratum = 9,
+  Brachymyrmex_delabiei = 8,
+  Brachymyrmex_feitosai = 7,
+  Camponotus_fallatus = 6,
+  Camponotus_hermanni = 5,
+  Camponotus_xanthogaster = 4,
+  Pheidole_aberrans = 3,
+  Pheidole_fimbriata = 3,
+  Pheidole_obscurithorax = 2,
+  Pheidole_subarmata = 2,
+  Strumigenys_fridericimuelleri = 2,
+  Heteroponera_inermis = 2,
+  Oxyepoecus_browni = 2,
+  Sphinctomyrmex_stali = 1,
+  Strumigenys_sanctipauli = 1,
+  Brachymyrmex_micromegas = 1,
+  Camponotus_tripartitus = 1,
+  Diaphoromyrma_sofiae = 1
+)
+
+colnames(dados) <- gsub("_", " ", colnames(dados))
+
+dados
+```
+
+## Running the pipeline
+
+The main function of the package, `antclassify()`, runs the full ecological workflow.
+
+```{r}
+resultado <- antclassify(dados)
+```
+
+## Accessing results
+
+You can access each component of the results:
+
+```{r}
+names(resultado)
+head(resultado$guilds$table)
+```

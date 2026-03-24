@@ -1,0 +1,124 @@
+#' @title Identify Ant Rarity Forms (Atlantic Forest)
+#' @description Checks a community matrix for ant rarity forms in the Brazilian Atlantic Forest based on Silva et al. (2024).
+#' @param comm A community matrix where species are columns and samples are rows.
+#' @export
+check_rarity_atlantic_ants <- function(comm) {
+
+  # --- WARNING ---
+  cat("\n********************************************************************************\n")
+  cat("ATTENTION:\n")
+  cat("This function identifies rare ant species and their rarity forms.\n")
+  cat("This classification is specific to the Brazilian Atlantic Forest and\n")
+  cat("may not be appropriate for other biomes.\n")
+  cat("********************************************************************************\n\n")
+
+  message("Step 1: Preparing community data and rarity database...")
+
+  # (Silva et al. 2024)
+  rarity_db <- data.frame(
+    species = c(
+      "Acanthoponera mucronata", "Acropyga guianensis", "Alfaria minuta", "Brachymyrmex coactus",
+      "Camponotus trapezoideus", "Ectatomma tuberculatum", "Eurhopalothrix bruchi", "Leptogenys unistimulosa",
+      "Mayaponera arhuaca", "Megalomyrmex incisus", "Neivamyrmex punctaticeps", "Oxyepoecus longicephalus",
+      "Oxyepoecus reticulatus", "Procryptocerus convergens", "Pseudomyrmex tenuis", "Pseudoponera gilberti",
+      "Pseudoponera stigma", "Strumigenys cultrigera", "Strumigenys gytha", "Strumigenys precava",
+      "Strumigenys schulzi", "Strumigenys smithii", "Thaumatomyrmex atrox", "Wasmannia scrobifera",
+      "Apterostigma acre", "Camponotus atriceps", "Camponotus blandus", "Camponotus crassus",
+      "Camponotus lespesii", "Camponotus senex", "Crematogaster arata", "Crematogaster rochai",
+      "Cyphomyrmex major", "Dorymyrmex brunneus", "Hypoponera distinguenda", "Linepithema leucomelas",
+      "Linepithema micans", "Mycocepurus goeldii", "Mycocepurus smithii", "Myrmelachista arthuri",
+      "Myrmelachista catharinae", "Myrmelachista ruzskyi", "Neivamyrmex pseudops", "Ochetomyrmex subpolitus",
+      "Octostruma balzani", "Oxyepoecus plaumanni", "Pheidole aberrans", "Pheidole fimbriata",
+      "Pheidole obscurithorax", "Pheidole subarmata", "Pogonomyrmex naegelii", "Pseudomyrmex gracilis",
+      "Pseudomyrmex phyllophilus", "Pseudomyrmex schuppi", "Solenopsis geminata", "Thaumatomyrmex mutilatus",
+      "Typhlomyrmex rogenhoferi", "Wasmannia rochai", "Acropyga xexsanguis", "Acropyga panamensis",
+      "Basiceros convexiceps", "Brachymyrmex patagonicus", "Camponotus canescens", "Cephalotes angustus",
+      "Crematogaster corticicola", "Cylindromyrmex brasiliensis", "Cyphomyrmex transversus", "Eciton quadriglume",
+      "Ectatomma brunneum", "Ectatomma permagnum", "Eurhopalothrix gravis", "Gnamptogenys haenschi",
+      "Gnamptogenys interrupta", "Gnamptogenys sulcata", "Holcoponera pleurodon", "Labidus mars",
+      "Linepithema pulex", "Mycetarotes carinatus", "Mycetarotes parallelus", "Mycetomoellerius urichii",
+      "Mycetophylax olitor", "Neoponera unidentata", "Nesomyrmex echinatinodis", "Oxyepoecus bruchi",
+      "Oxyepoecus vezenyii", "Procryptocerus regularis", "Pseudomyrmex oculatus", "Rasopone lunaris",
+      "Rogeria subarmata", "Strumigenys carinithorax", "Strumigenys epelys", "Strumigenys fridericimuelleri",
+      "Brachymyrmex feitosai", "Heteroponera inermis", "Lachnomyrmex victori", "Megalomyrmex iheringi",
+      "Megalomyrmex myops", "Mycetophylax plaumanni", "Oxyepoecus crassinodus", "Strumigenys splendens",
+      "Typhlomyrmex reichenspergeri", "Phalacromyrmex fugax", "Poneracantha lucaris", "Strumigenys dapsilis",
+      "Strumigenys reticeps", "Lachnomyrmex nordestinus", "Megalomyrmex pusillus", "Oxyepoecus browni",
+      "Sphinctomyrmex stali", "Strumigenys sanctipauli", "Brachymyrmex micromegas", "Camponotus tripartitus",
+      "Diaphoromyrma sofiae", "Eurhopalothrix speciosa", "Heteroponera robusta", "Mycetarotes senticosus",
+      "Mycetophylax auritus", "Neoponera metanotalis", "Strumigenys dentinasis", "Strumigenys substricta"
+    ),
+    rarity_form = c(
+      rep("Form 1", 24), rep("Form 2", 34), rep("Form 3", 34), rep("Form 4", 9),
+      rep("Form 5", 4), rep("Form 6", 5), rep("Form 7", 10)
+    ),
+    stringsAsFactors = FALSE
+  )
+
+  # Data processing
+  dados_numericos <- as.data.frame(comm)
+  nomes_limpos <- trimws(gsub("_", " ", gsub("\\.", " ", colnames(dados_numericos))))
+  colnames(dados_numericos) <- nomes_limpos
+
+  rarity_db$species <- trimws(rarity_db$species)
+
+  total_abs <- sum(colSums(dados_numericos, na.rm = TRUE))
+
+  # Summary table
+  df <- data.frame(
+    species = colnames(dados_numericos),
+    abundance = as.numeric(colSums(dados_numericos, na.rm = TRUE)),
+    stringsAsFactors = FALSE
+  )
+
+  # Merge with rarity database
+  df <- merge(df, rarity_db, by = "species", all.x = TRUE)
+  df$rarity_form[is.na(df$rarity_form)] <- "Common"
+
+  df$percentage <- (df$abundance / total_abs) * 100
+
+  message("Step 2: Generating results...")
+
+  # Plotting
+  res_plot <- dplyr::group_by(df, rarity_form)
+  res_plot <- dplyr::summarise(res_plot, total = sum(abundance), .groups = "drop")
+  res_plot <- dplyr::mutate(res_plot, prop = total / sum(total))
+
+  p1 <- ggplot2::ggplot(res_plot, ggplot2::aes(x = stats::reorder(rarity_form, prop), y = prop, fill = rarity_form)) +
+    ggplot2::geom_col() +
+    ggplot2::scale_y_continuous(labels = scales::percent) +
+    ggplot2::labs(
+      title = "Ant Rarity Forms Distribution",
+      subtitle = "Based on total abundance in the community",
+      x = "Rarity Classification",
+      y = "Proportion (%)"
+    ) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(legend.position = "bottom")
+
+  # Filtragem para o retorno
+  raras_detectadas <- df[df$rarity_form != "Common", ]
+  rownames(raras_detectadas) <- NULL
+
+  cat("\n********************************************************************************\n")
+  if(nrow(raras_detectadas) > 0) {
+    cat("RARE SPECIES DETECTED:\n")
+    print(raras_detectadas[, c("species", "rarity_form", "abundance", "percentage")])
+  } else {
+    cat("No rare species from the target list were detected.\n")
+  }
+
+  # --- REFERENCE ---
+  cat("\nDATA SOURCE AND REFERENCE:\n")
+  cat("Silva, N. S., Maciel, E. A., Prado, L. P., Silva, O. G., Barbosa, D. A., \n")
+  cat("Andrade-Silva, J., ... & Morini, M. S. (2024). \n")
+  cat("'Ant rarity and vulnerability in Brazilian Atlantic Forest fragments.'\n")
+  cat("Biological Conservation, 296, 110640.\n")
+  cat("********************************************************************************\n")
+
+ 
+  print(p1)
+
+  
+  return(invisible(list(table = raras_detectadas, plot = p1)))
+}

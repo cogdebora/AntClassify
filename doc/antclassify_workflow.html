@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>antclassify_workflow</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">antclassify_workflow</h1>
+
+
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(AntClassify)</span></code></pre></div>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>The <strong>AntClassify</strong> package provides an integrated
+ecological pipeline to classify ant communities into functional guilds,
+identify exotic species, detect endemic and rare species of the Atlantic
+Forest, and quantify key ecological patterns.</p>
+<p>This tool was developed to facilitate ecological analyses,
+standardize functional classification, and improve reproducibility in
+ant community studies. By integrating multiple ecological databases into
+a single workflow, AntClassify allows researchers to efficiently assess
+community structure, biological invasions, endemism, and rarity
+patterns.</p>
+<p>The package is particularly useful for biodiversity monitoring,
+conservation planning, and macroecological research involving ant
+assemblages.</p>
+<p>AntClassify aims to provide a standardized and reproducible framework
+for advancing ecological research on ant communities.</p>
+</div>
+<div id="example-dataset" class="section level2">
+<h2>Example dataset</h2>
+<p>To demonstrate the functionality of the package, we create a more
+realistic ant community dataset.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>dados <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>  <span class="at">Atta_sexdens =</span> <span class="dv">50</span>,</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>  <span class="at">Camponotus_atriceps =</span> <span class="dv">40</span>,</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>  <span class="at">Crematogaster_sp =</span> <span class="dv">35</span>,</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>  <span class="at">Cyphomyrmex_minutus =</span> <span class="dv">30</span>,</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>  <span class="at">Cyphomyrmex_rimosus =</span> <span class="dv">28</span>,</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>  <span class="at">Ectatomma_edentatum =</span> <span class="dv">25</span>,</span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>  <span class="at">Heteroponera_mayri =</span> <span class="dv">22</span>,</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>  <span class="at">Holcoponera_striatula =</span> <span class="dv">20</span>,</span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>  <span class="at">Monomorium_floricola =</span> <span class="dv">18</span>,</span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>  <span class="at">Monomorium_pharaonis =</span> <span class="dv">17</span>,</span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a>  <span class="at">Pheidole_megacephala =</span> <span class="dv">16</span>,</span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a>  <span class="at">Strumigenys_emmae =</span> <span class="dv">15</span>,</span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>  <span class="at">Strumigenys_rogeri =</span> <span class="dv">14</span>,</span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a>  <span class="at">Nylanderia_fulva =</span> <span class="dv">13</span>,</span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a>  <span class="at">Odontomachus_chelifer =</span> <span class="dv">12</span>,</span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a>  <span class="at">Oxyepoecus_reticulatus =</span> <span class="dv">11</span>,</span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a>  <span class="at">Pachycondyla_striata =</span> <span class="dv">10</span>,</span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a>  <span class="at">Apterostigma_serratum =</span> <span class="dv">9</span>,</span>
+<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a>  <span class="at">Brachymyrmex_delabiei =</span> <span class="dv">8</span>,</span>
+<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a>  <span class="at">Brachymyrmex_feitosai =</span> <span class="dv">7</span>,</span>
+<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a>  <span class="at">Camponotus_fallatus =</span> <span class="dv">6</span>,</span>
+<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a>  <span class="at">Camponotus_hermanni =</span> <span class="dv">5</span>,</span>
+<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a>  <span class="at">Camponotus_xanthogaster =</span> <span class="dv">4</span>,</span>
+<span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a>  <span class="at">Pheidole_aberrans =</span> <span class="dv">3</span>,</span>
+<span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a>  <span class="at">Pheidole_fimbriata =</span> <span class="dv">3</span>,</span>
+<span id="cb2-27"><a href="#cb2-27" tabindex="-1"></a>  <span class="at">Pheidole_obscurithorax =</span> <span class="dv">2</span>,</span>
+<span id="cb2-28"><a href="#cb2-28" tabindex="-1"></a>  <span class="at">Pheidole_subarmata =</span> <span class="dv">2</span>,</span>
+<span id="cb2-29"><a href="#cb2-29" tabindex="-1"></a>  <span class="at">Strumigenys_fridericimuelleri =</span> <span class="dv">2</span>,</span>
+<span id="cb2-30"><a href="#cb2-30" tabindex="-1"></a>  <span class="at">Heteroponera_inermis =</span> <span class="dv">2</span>,</span>
+<span id="cb2-31"><a href="#cb2-31" tabindex="-1"></a>  <span class="at">Oxyepoecus_browni =</span> <span class="dv">2</span>,</span>
+<span id="cb2-32"><a href="#cb2-32" tabindex="-1"></a>  <span class="at">Sphinctomyrmex_stali =</span> <span class="dv">1</span>,</span>
+<span id="cb2-33"><a href="#cb2-33" tabindex="-1"></a>  <span class="at">Strumigenys_sanctipauli =</span> <span class="dv">1</span>,</span>
+<span id="cb2-34"><a href="#cb2-34" tabindex="-1"></a>  <span class="at">Brachymyrmex_micromegas =</span> <span class="dv">1</span>,</span>
+<span id="cb2-35"><a href="#cb2-35" tabindex="-1"></a>  <span class="at">Camponotus_tripartitus =</span> <span class="dv">1</span>,</span>
+<span id="cb2-36"><a href="#cb2-36" tabindex="-1"></a>  <span class="at">Diaphoromyrma_sofiae =</span> <span class="dv">1</span></span>
+<span id="cb2-37"><a href="#cb2-37" tabindex="-1"></a>)</span>
+<span id="cb2-38"><a href="#cb2-38" tabindex="-1"></a></span>
+<span id="cb2-39"><a href="#cb2-39" tabindex="-1"></a><span class="fu">colnames</span>(dados) <span class="ot">&lt;-</span> <span class="fu">gsub</span>(<span class="st">&quot;_&quot;</span>, <span class="st">&quot; &quot;</span>, <span class="fu">colnames</span>(dados))</span>
+<span id="cb2-40"><a href="#cb2-40" tabindex="-1"></a></span>
+<span id="cb2-41"><a href="#cb2-41" tabindex="-1"></a>dados</span>
+<span id="cb2-42"><a href="#cb2-42" tabindex="-1"></a><span class="co">#&gt;   Atta sexdens Camponotus atriceps Crematogaster sp Cyphomyrmex minutus</span></span>
+<span id="cb2-43"><a href="#cb2-43" tabindex="-1"></a><span class="co">#&gt; 1           50                  40               35                  30</span></span>
+<span id="cb2-44"><a href="#cb2-44" tabindex="-1"></a><span class="co">#&gt;   Cyphomyrmex rimosus Ectatomma edentatum Heteroponera mayri</span></span>
+<span id="cb2-45"><a href="#cb2-45" tabindex="-1"></a><span class="co">#&gt; 1                  28                  25                 22</span></span>
+<span id="cb2-46"><a href="#cb2-46" tabindex="-1"></a><span class="co">#&gt;   Holcoponera striatula Monomorium floricola Monomorium pharaonis</span></span>
+<span id="cb2-47"><a href="#cb2-47" tabindex="-1"></a><span class="co">#&gt; 1                    20                   18                   17</span></span>
+<span id="cb2-48"><a href="#cb2-48" tabindex="-1"></a><span class="co">#&gt;   Pheidole megacephala Strumigenys emmae Strumigenys rogeri Nylanderia fulva</span></span>
+<span id="cb2-49"><a href="#cb2-49" tabindex="-1"></a><span class="co">#&gt; 1                   16                15                 14               13</span></span>
+<span id="cb2-50"><a href="#cb2-50" tabindex="-1"></a><span class="co">#&gt;   Odontomachus chelifer Oxyepoecus reticulatus Pachycondyla striata</span></span>
+<span id="cb2-51"><a href="#cb2-51" tabindex="-1"></a><span class="co">#&gt; 1                    12                     11                   10</span></span>
+<span id="cb2-52"><a href="#cb2-52" tabindex="-1"></a><span class="co">#&gt;   Apterostigma serratum Brachymyrmex delabiei Brachymyrmex feitosai</span></span>
+<span id="cb2-53"><a href="#cb2-53" tabindex="-1"></a><span class="co">#&gt; 1                     9                     8                     7</span></span>
+<span id="cb2-54"><a href="#cb2-54" tabindex="-1"></a><span class="co">#&gt;   Camponotus fallatus Camponotus hermanni Camponotus xanthogaster</span></span>
+<span id="cb2-55"><a href="#cb2-55" tabindex="-1"></a><span class="co">#&gt; 1                   6                   5                       4</span></span>
+<span id="cb2-56"><a href="#cb2-56" tabindex="-1"></a><span class="co">#&gt;   Pheidole aberrans Pheidole fimbriata Pheidole obscurithorax</span></span>
+<span id="cb2-57"><a href="#cb2-57" tabindex="-1"></a><span class="co">#&gt; 1                 3                  3                      2</span></span>
+<span id="cb2-58"><a href="#cb2-58" tabindex="-1"></a><span class="co">#&gt;   Pheidole subarmata Strumigenys fridericimuelleri Heteroponera inermis</span></span>
+<span id="cb2-59"><a href="#cb2-59" tabindex="-1"></a><span class="co">#&gt; 1                  2                             2                    2</span></span>
+<span id="cb2-60"><a href="#cb2-60" tabindex="-1"></a><span class="co">#&gt;   Oxyepoecus browni Sphinctomyrmex stali Strumigenys sanctipauli</span></span>
+<span id="cb2-61"><a href="#cb2-61" tabindex="-1"></a><span class="co">#&gt; 1                 2                    1                       1</span></span>
+<span id="cb2-62"><a href="#cb2-62" tabindex="-1"></a><span class="co">#&gt;   Brachymyrmex micromegas Camponotus tripartitus Diaphoromyrma sofiae</span></span>
+<span id="cb2-63"><a href="#cb2-63" tabindex="-1"></a><span class="co">#&gt; 1                       1                      1                    1</span></span></code></pre></div>
+</div>
+<div id="running-the-pipeline" class="section level2">
+<h2>Running the pipeline</h2>
+<p>The main function of the package, <code>antclassify()</code>, runs
+the full ecological workflow.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>resultado <span class="ot">&lt;-</span> <span class="fu">antclassify</span>(dados)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="co">#&gt; =================================================</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co">#&gt; Starting AntClassify ecological pipeline</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co">#&gt; =================================================</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt; &gt;&gt;&gt; Running guild classification</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co">#&gt; Step 1: Preparing community data...</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co">#&gt; Step 2: Matching species to functional guilds...</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#&gt; Guild classification results:</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co">#&gt;                                                     species abundance</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co">#&gt; Atta sexdens                                   Atta sexdens        50</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="co">#&gt; Camponotus atriceps                     Camponotus atriceps        40</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co">#&gt; Crematogaster sp                           Crematogaster sp        35</span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#&gt; Cyphomyrmex minutus                     Cyphomyrmex minutus        30</span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="co">#&gt; Cyphomyrmex rimosus                     Cyphomyrmex rimosus        28</span></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="co">#&gt; Ectatomma edentatum                     Ectatomma edentatum        25</span></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#&gt; Heteroponera mayri                       Heteroponera mayri        22</span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="co">#&gt; Holcoponera striatula                 Holcoponera striatula        20</span></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="co">#&gt; Monomorium floricola                   Monomorium floricola        18</span></span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="co">#&gt; Monomorium pharaonis                   Monomorium pharaonis        17</span></span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="co">#&gt; Pheidole megacephala                   Pheidole megacephala        16</span></span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a><span class="co">#&gt; Strumigenys emmae                         Strumigenys emmae        15</span></span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a><span class="co">#&gt; Strumigenys rogeri                       Strumigenys rogeri        14</span></span>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a><span class="co">#&gt; Nylanderia fulva                           Nylanderia fulva        13</span></span>
+<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a><span class="co">#&gt; Odontomachus chelifer                 Odontomachus chelifer        12</span></span>
+<span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a><span class="co">#&gt; Oxyepoecus reticulatus               Oxyepoecus reticulatus        11</span></span>
+<span id="cb3-28"><a href="#cb3-28" tabindex="-1"></a><span class="co">#&gt; Pachycondyla striata                   Pachycondyla striata        10</span></span>
+<span id="cb3-29"><a href="#cb3-29" tabindex="-1"></a><span class="co">#&gt; Apterostigma serratum                 Apterostigma serratum         9</span></span>
+<span id="cb3-30"><a href="#cb3-30" tabindex="-1"></a><span class="co">#&gt; Brachymyrmex delabiei                 Brachymyrmex delabiei         8</span></span>
+<span id="cb3-31"><a href="#cb3-31" tabindex="-1"></a><span class="co">#&gt; Brachymyrmex feitosai                 Brachymyrmex feitosai         7</span></span>
+<span id="cb3-32"><a href="#cb3-32" tabindex="-1"></a><span class="co">#&gt; Camponotus fallatus                     Camponotus fallatus         6</span></span>
+<span id="cb3-33"><a href="#cb3-33" tabindex="-1"></a><span class="co">#&gt; Camponotus hermanni                     Camponotus hermanni         5</span></span>
+<span id="cb3-34"><a href="#cb3-34" tabindex="-1"></a><span class="co">#&gt; Camponotus xanthogaster             Camponotus xanthogaster         4</span></span>
+<span id="cb3-35"><a href="#cb3-35" tabindex="-1"></a><span class="co">#&gt; Pheidole aberrans                         Pheidole aberrans         3</span></span>
+<span id="cb3-36"><a href="#cb3-36" tabindex="-1"></a><span class="co">#&gt; Pheidole fimbriata                       Pheidole fimbriata         3</span></span>
+<span id="cb3-37"><a href="#cb3-37" tabindex="-1"></a><span class="co">#&gt; Pheidole obscurithorax               Pheidole obscurithorax         2</span></span>
+<span id="cb3-38"><a href="#cb3-38" tabindex="-1"></a><span class="co">#&gt; Pheidole subarmata                       Pheidole subarmata         2</span></span>
+<span id="cb3-39"><a href="#cb3-39" tabindex="-1"></a><span class="co">#&gt; Strumigenys fridericimuelleri Strumigenys fridericimuelleri         2</span></span>
+<span id="cb3-40"><a href="#cb3-40" tabindex="-1"></a><span class="co">#&gt; Heteroponera inermis                   Heteroponera inermis         2</span></span>
+<span id="cb3-41"><a href="#cb3-41" tabindex="-1"></a><span class="co">#&gt; Oxyepoecus browni                         Oxyepoecus browni         2</span></span>
+<span id="cb3-42"><a href="#cb3-42" tabindex="-1"></a><span class="co">#&gt; Sphinctomyrmex stali                   Sphinctomyrmex stali         1</span></span>
+<span id="cb3-43"><a href="#cb3-43" tabindex="-1"></a><span class="co">#&gt; Strumigenys sanctipauli             Strumigenys sanctipauli         1</span></span>
+<span id="cb3-44"><a href="#cb3-44" tabindex="-1"></a><span class="co">#&gt; Brachymyrmex micromegas             Brachymyrmex micromegas         1</span></span>
+<span id="cb3-45"><a href="#cb3-45" tabindex="-1"></a><span class="co">#&gt; Camponotus tripartitus               Camponotus tripartitus         1</span></span>
+<span id="cb3-46"><a href="#cb3-46" tabindex="-1"></a><span class="co">#&gt; Diaphoromyrma sofiae                   Diaphoromyrma sofiae         1</span></span>
+<span id="cb3-47"><a href="#cb3-47" tabindex="-1"></a><span class="co">#&gt;                               percentage</span></span>
+<span id="cb3-48"><a href="#cb3-48" tabindex="-1"></a><span class="co">#&gt; Atta sexdens                  11.4678899</span></span>
+<span id="cb3-49"><a href="#cb3-49" tabindex="-1"></a><span class="co">#&gt; Camponotus atriceps            9.1743119</span></span>
+<span id="cb3-50"><a href="#cb3-50" tabindex="-1"></a><span class="co">#&gt; Crematogaster sp               8.0275229</span></span>
+<span id="cb3-51"><a href="#cb3-51" tabindex="-1"></a><span class="co">#&gt; Cyphomyrmex minutus            6.8807339</span></span>
+<span id="cb3-52"><a href="#cb3-52" tabindex="-1"></a><span class="co">#&gt; Cyphomyrmex rimosus            6.4220183</span></span>
+<span id="cb3-53"><a href="#cb3-53" tabindex="-1"></a><span class="co">#&gt; Ectatomma edentatum            5.7339450</span></span>
+<span id="cb3-54"><a href="#cb3-54" tabindex="-1"></a><span class="co">#&gt; Heteroponera mayri             5.0458716</span></span>
+<span id="cb3-55"><a href="#cb3-55" tabindex="-1"></a><span class="co">#&gt; Holcoponera striatula          4.5871560</span></span>
+<span id="cb3-56"><a href="#cb3-56" tabindex="-1"></a><span class="co">#&gt; Monomorium floricola           4.1284404</span></span>
+<span id="cb3-57"><a href="#cb3-57" tabindex="-1"></a><span class="co">#&gt; Monomorium pharaonis           3.8990826</span></span>
+<span id="cb3-58"><a href="#cb3-58" tabindex="-1"></a><span class="co">#&gt; Pheidole megacephala           3.6697248</span></span>
+<span id="cb3-59"><a href="#cb3-59" tabindex="-1"></a><span class="co">#&gt; Strumigenys emmae              3.4403670</span></span>
+<span id="cb3-60"><a href="#cb3-60" tabindex="-1"></a><span class="co">#&gt; Strumigenys rogeri             3.2110092</span></span>
+<span id="cb3-61"><a href="#cb3-61" tabindex="-1"></a><span class="co">#&gt; Nylanderia fulva               2.9816514</span></span>
+<span id="cb3-62"><a href="#cb3-62" tabindex="-1"></a><span class="co">#&gt; Odontomachus chelifer          2.7522936</span></span>
+<span id="cb3-63"><a href="#cb3-63" tabindex="-1"></a><span class="co">#&gt; Oxyepoecus reticulatus         2.5229358</span></span>
+<span id="cb3-64"><a href="#cb3-64" tabindex="-1"></a><span class="co">#&gt; Pachycondyla striata           2.2935780</span></span>
+<span id="cb3-65"><a href="#cb3-65" tabindex="-1"></a><span class="co">#&gt; Apterostigma serratum          2.0642202</span></span>
+<span id="cb3-66"><a href="#cb3-66" tabindex="-1"></a><span class="co">#&gt; Brachymyrmex delabiei          1.8348624</span></span>
+<span id="cb3-67"><a href="#cb3-67" tabindex="-1"></a><span class="co">#&gt; Brachymyrmex feitosai          1.6055046</span></span>
+<span id="cb3-68"><a href="#cb3-68" tabindex="-1"></a><span class="co">#&gt; Camponotus fallatus            1.3761468</span></span>
+<span id="cb3-69"><a href="#cb3-69" tabindex="-1"></a><span class="co">#&gt; Camponotus hermanni            1.1467890</span></span>
+<span id="cb3-70"><a href="#cb3-70" tabindex="-1"></a><span class="co">#&gt; Camponotus xanthogaster        0.9174312</span></span>
+<span id="cb3-71"><a href="#cb3-71" tabindex="-1"></a><span class="co">#&gt; Pheidole aberrans              0.6880734</span></span>
+<span id="cb3-72"><a href="#cb3-72" tabindex="-1"></a><span class="co">#&gt; Pheidole fimbriata             0.6880734</span></span>
+<span id="cb3-73"><a href="#cb3-73" tabindex="-1"></a><span class="co">#&gt; Pheidole obscurithorax         0.4587156</span></span>
+<span id="cb3-74"><a href="#cb3-74" tabindex="-1"></a><span class="co">#&gt; Pheidole subarmata             0.4587156</span></span>
+<span id="cb3-75"><a href="#cb3-75" tabindex="-1"></a><span class="co">#&gt; Strumigenys fridericimuelleri  0.4587156</span></span>
+<span id="cb3-76"><a href="#cb3-76" tabindex="-1"></a><span class="co">#&gt; Heteroponera inermis           0.4587156</span></span>
+<span id="cb3-77"><a href="#cb3-77" tabindex="-1"></a><span class="co">#&gt; Oxyepoecus browni              0.4587156</span></span>
+<span id="cb3-78"><a href="#cb3-78" tabindex="-1"></a><span class="co">#&gt; Sphinctomyrmex stali           0.2293578</span></span>
+<span id="cb3-79"><a href="#cb3-79" tabindex="-1"></a><span class="co">#&gt; Strumigenys sanctipauli        0.2293578</span></span>
+<span id="cb3-80"><a href="#cb3-80" tabindex="-1"></a><span class="co">#&gt; Brachymyrmex micromegas        0.2293578</span></span>
+<span id="cb3-81"><a href="#cb3-81" tabindex="-1"></a><span class="co">#&gt; Camponotus tripartitus         0.2293578</span></span>
+<span id="cb3-82"><a href="#cb3-82" tabindex="-1"></a><span class="co">#&gt; Diaphoromyrma sofiae           0.2293578</span></span>
+<span id="cb3-83"><a href="#cb3-83" tabindex="-1"></a><span class="co">#&gt;                                                                                                antclassify_guild</span></span>
+<span id="cb3-84"><a href="#cb3-84" tabindex="-1"></a><span class="co">#&gt; Atta sexdens                                                        Fungus-growers (soil or leaf litter nesting)</span></span>
+<span id="cb3-85"><a href="#cb3-85" tabindex="-1"></a><span class="co">#&gt; Camponotus atriceps           Generalist omnivores (dominant or opportunistic in soil, leaf litter, or arboreal)</span></span>
+<span id="cb3-86"><a href="#cb3-86" tabindex="-1"></a><span class="co">#&gt; Crematogaster sp              Generalist omnivores (dominant or opportunistic in soil, leaf litter, or arboreal)</span></span>
+<span id="cb3-87"><a href="#cb3-87" tabindex="-1"></a><span class="co">#&gt; Cyphomyrmex minutus                                                 Fungus-growers (soil or leaf litter nesting)</span></span>
+<span id="cb3-88"><a href="#cb3-88" tabindex="-1"></a><span class="co">#&gt; Cyphomyrmex rimosus                                                 Fungus-growers (soil or leaf litter nesting)</span></span>
+<span id="cb3-89"><a href="#cb3-89" tabindex="-1"></a><span class="co">#&gt; Ectatomma edentatum                            Generalist predators (dominant or cryptic in soil or leaf litter)</span></span>
+<span id="cb3-90"><a href="#cb3-90" tabindex="-1"></a><span class="co">#&gt; Heteroponera mayri            Generalist omnivores (dominant or opportunistic in soil, leaf litter, or arboreal)</span></span>
+<span id="cb3-91"><a href="#cb3-91" tabindex="-1"></a><span class="co">#&gt; Holcoponera striatula                          Generalist predators (dominant or cryptic in soil or leaf litter)</span></span>
+<span id="cb3-92"><a href="#cb3-92" tabindex="-1"></a><span class="co">#&gt; Monomorium floricola                                                                          Unidentified Guild</span></span>
+<span id="cb3-93"><a href="#cb3-93" tabindex="-1"></a><span class="co">#&gt; Monomorium pharaonis                                                                          Unidentified Guild</span></span>
+<span id="cb3-94"><a href="#cb3-94" tabindex="-1"></a><span class="co">#&gt; Pheidole megacephala                               Leaf litter omnivores and scavengers (cryptic or non-cryptic)</span></span>
+<span id="cb3-95"><a href="#cb3-95" tabindex="-1"></a><span class="co">#&gt; Strumigenys emmae             Generalist omnivores (dominant or opportunistic in soil, leaf litter, or arboreal)</span></span>
+<span id="cb3-96"><a href="#cb3-96" tabindex="-1"></a><span class="co">#&gt; Strumigenys rogeri            Generalist omnivores (dominant or opportunistic in soil, leaf litter, or arboreal)</span></span>
+<span id="cb3-97"><a href="#cb3-97" tabindex="-1"></a><span class="co">#&gt; Nylanderia fulva              Generalist omnivores (dominant or opportunistic in soil, leaf litter, or arboreal)</span></span>
+<span id="cb3-98"><a href="#cb3-98" tabindex="-1"></a><span class="co">#&gt; Odontomachus chelifer                          Generalist predators (dominant or cryptic in soil or leaf litter)</span></span>
+<span id="cb3-99"><a href="#cb3-99" tabindex="-1"></a><span class="co">#&gt; Oxyepoecus reticulatus                             Leaf litter omnivores and scavengers (cryptic or non-cryptic)</span></span>
+<span id="cb3-100"><a href="#cb3-100" tabindex="-1"></a><span class="co">#&gt; Pachycondyla striata                                               Specialist litter or soil predators (cryptic)</span></span>
+<span id="cb3-101"><a href="#cb3-101" tabindex="-1"></a><span class="co">#&gt; Apterostigma serratum                                               Fungus-growers (soil or leaf litter nesting)</span></span>
+<span id="cb3-102"><a href="#cb3-102" tabindex="-1"></a><span class="co">#&gt; Brachymyrmex delabiei         Generalist omnivores (dominant or opportunistic in soil, leaf litter, or arboreal)</span></span>
+<span id="cb3-103"><a href="#cb3-103" tabindex="-1"></a><span class="co">#&gt; Brachymyrmex feitosai         Generalist omnivores (dominant or opportunistic in soil, leaf litter, or arboreal)</span></span>
+<span id="cb3-104"><a href="#cb3-104" tabindex="-1"></a><span class="co">#&gt; Camponotus fallatus           Generalist omnivores (dominant or opportunistic in soil, leaf litter, or arboreal)</span></span>
+<span id="cb3-105"><a href="#cb3-105" tabindex="-1"></a><span class="co">#&gt; Camponotus hermanni           Generalist omnivores (dominant or opportunistic in soil, leaf litter, or arboreal)</span></span>
+<span id="cb3-106"><a href="#cb3-106" tabindex="-1"></a><span class="co">#&gt; Camponotus xanthogaster       Generalist omnivores (dominant or opportunistic in soil, leaf litter, or arboreal)</span></span>
+<span id="cb3-107"><a href="#cb3-107" tabindex="-1"></a><span class="co">#&gt; Pheidole aberrans                                  Leaf litter omnivores and scavengers (cryptic or non-cryptic)</span></span>
+<span id="cb3-108"><a href="#cb3-108" tabindex="-1"></a><span class="co">#&gt; Pheidole fimbriata                                 Leaf litter omnivores and scavengers (cryptic or non-cryptic)</span></span>
+<span id="cb3-109"><a href="#cb3-109" tabindex="-1"></a><span class="co">#&gt; Pheidole obscurithorax                             Leaf litter omnivores and scavengers (cryptic or non-cryptic)</span></span>
+<span id="cb3-110"><a href="#cb3-110" tabindex="-1"></a><span class="co">#&gt; Pheidole subarmata                                 Leaf litter omnivores and scavengers (cryptic or non-cryptic)</span></span>
+<span id="cb3-111"><a href="#cb3-111" tabindex="-1"></a><span class="co">#&gt; Strumigenys fridericimuelleri Generalist omnivores (dominant or opportunistic in soil, leaf litter, or arboreal)</span></span>
+<span id="cb3-112"><a href="#cb3-112" tabindex="-1"></a><span class="co">#&gt; Heteroponera inermis          Generalist omnivores (dominant or opportunistic in soil, leaf litter, or arboreal)</span></span>
+<span id="cb3-113"><a href="#cb3-113" tabindex="-1"></a><span class="co">#&gt; Oxyepoecus browni                                  Leaf litter omnivores and scavengers (cryptic or non-cryptic)</span></span>
+<span id="cb3-114"><a href="#cb3-114" tabindex="-1"></a><span class="co">#&gt; Sphinctomyrmex stali                                                                          Unidentified Guild</span></span>
+<span id="cb3-115"><a href="#cb3-115" tabindex="-1"></a><span class="co">#&gt; Strumigenys sanctipauli       Generalist omnivores (dominant or opportunistic in soil, leaf litter, or arboreal)</span></span>
+<span id="cb3-116"><a href="#cb3-116" tabindex="-1"></a><span class="co">#&gt; Brachymyrmex micromegas       Generalist omnivores (dominant or opportunistic in soil, leaf litter, or arboreal)</span></span>
+<span id="cb3-117"><a href="#cb3-117" tabindex="-1"></a><span class="co">#&gt; Camponotus tripartitus        Generalist omnivores (dominant or opportunistic in soil, leaf litter, or arboreal)</span></span>
+<span id="cb3-118"><a href="#cb3-118" tabindex="-1"></a><span class="co">#&gt; Diaphoromyrma sofiae                                                                          Unidentified Guild</span></span>
+<span id="cb3-119"><a href="#cb3-119" tabindex="-1"></a><span class="co">#&gt;                                                                                      silva_guild</span></span>
+<span id="cb3-120"><a href="#cb3-120" tabindex="-1"></a><span class="co">#&gt; Atta sexdens                                                                  Unidentified Guild</span></span>
+<span id="cb3-121"><a href="#cb3-121" tabindex="-1"></a><span class="co">#&gt; Camponotus atriceps                                                           Unidentified Guild</span></span>
+<span id="cb3-122"><a href="#cb3-122" tabindex="-1"></a><span class="co">#&gt; Crematogaster sp                                                              Unidentified Guild</span></span>
+<span id="cb3-123"><a href="#cb3-123" tabindex="-1"></a><span class="co">#&gt; Cyphomyrmex minutus                                                           Unidentified Guild</span></span>
+<span id="cb3-124"><a href="#cb3-124" tabindex="-1"></a><span class="co">#&gt; Cyphomyrmex rimosus                                                           Unidentified Guild</span></span>
+<span id="cb3-125"><a href="#cb3-125" tabindex="-1"></a><span class="co">#&gt; Ectatomma edentatum                                        Generalist predatory ectaheteromorphs</span></span>
+<span id="cb3-126"><a href="#cb3-126" tabindex="-1"></a><span class="co">#&gt; Heteroponera mayri            Small, generalist, low-agility ponerines living in the leaf litter</span></span>
+<span id="cb3-127"><a href="#cb3-127" tabindex="-1"></a><span class="co">#&gt; Holcoponera striatula                                      Generalist predatory ectaheteromorphs</span></span>
+<span id="cb3-128"><a href="#cb3-128" tabindex="-1"></a><span class="co">#&gt; Monomorium floricola                                                          Unidentified Guild</span></span>
+<span id="cb3-129"><a href="#cb3-129" tabindex="-1"></a><span class="co">#&gt; Monomorium pharaonis                                                          Unidentified Guild</span></span>
+<span id="cb3-130"><a href="#cb3-130" tabindex="-1"></a><span class="co">#&gt; Pheidole megacephala                                                          Unidentified Guild</span></span>
+<span id="cb3-131"><a href="#cb3-131" tabindex="-1"></a><span class="co">#&gt; Strumigenys emmae                                                             Unidentified Guild</span></span>
+<span id="cb3-132"><a href="#cb3-132" tabindex="-1"></a><span class="co">#&gt; Strumigenys rogeri                                                            Unidentified Guild</span></span>
+<span id="cb3-133"><a href="#cb3-133" tabindex="-1"></a><span class="co">#&gt; Nylanderia fulva                                                              Unidentified Guild</span></span>
+<span id="cb3-134"><a href="#cb3-134" tabindex="-1"></a><span class="co">#&gt; Odontomachus chelifer                                                         Unidentified Guild</span></span>
+<span id="cb3-135"><a href="#cb3-135" tabindex="-1"></a><span class="co">#&gt; Oxyepoecus reticulatus                                                        Unidentified Guild</span></span>
+<span id="cb3-136"><a href="#cb3-136" tabindex="-1"></a><span class="co">#&gt; Pachycondyla striata                                 Large, solitary epigeic predatory ponerines</span></span>
+<span id="cb3-137"><a href="#cb3-137" tabindex="-1"></a><span class="co">#&gt; Apterostigma serratum                                                         Unidentified Guild</span></span>
+<span id="cb3-138"><a href="#cb3-138" tabindex="-1"></a><span class="co">#&gt; Brachymyrmex delabiei                                                         Unidentified Guild</span></span>
+<span id="cb3-139"><a href="#cb3-139" tabindex="-1"></a><span class="co">#&gt; Brachymyrmex feitosai                                                         Unidentified Guild</span></span>
+<span id="cb3-140"><a href="#cb3-140" tabindex="-1"></a><span class="co">#&gt; Camponotus fallatus                                                           Unidentified Guild</span></span>
+<span id="cb3-141"><a href="#cb3-141" tabindex="-1"></a><span class="co">#&gt; Camponotus hermanni                                                           Unidentified Guild</span></span>
+<span id="cb3-142"><a href="#cb3-142" tabindex="-1"></a><span class="co">#&gt; Camponotus xanthogaster                                                       Unidentified Guild</span></span>
+<span id="cb3-143"><a href="#cb3-143" tabindex="-1"></a><span class="co">#&gt; Pheidole aberrans                                                             Unidentified Guild</span></span>
+<span id="cb3-144"><a href="#cb3-144" tabindex="-1"></a><span class="co">#&gt; Pheidole fimbriata                                                            Unidentified Guild</span></span>
+<span id="cb3-145"><a href="#cb3-145" tabindex="-1"></a><span class="co">#&gt; Pheidole obscurithorax                                                        Unidentified Guild</span></span>
+<span id="cb3-146"><a href="#cb3-146" tabindex="-1"></a><span class="co">#&gt; Pheidole subarmata                                                            Unidentified Guild</span></span>
+<span id="cb3-147"><a href="#cb3-147" tabindex="-1"></a><span class="co">#&gt; Strumigenys fridericimuelleri                                                 Unidentified Guild</span></span>
+<span id="cb3-148"><a href="#cb3-148" tabindex="-1"></a><span class="co">#&gt; Heteroponera inermis                                         Poneromorphs with arboreal activity</span></span>
+<span id="cb3-149"><a href="#cb3-149" tabindex="-1"></a><span class="co">#&gt; Oxyepoecus browni                                                             Unidentified Guild</span></span>
+<span id="cb3-150"><a href="#cb3-150" tabindex="-1"></a><span class="co">#&gt; Sphinctomyrmex stali                                                          Unidentified Guild</span></span>
+<span id="cb3-151"><a href="#cb3-151" tabindex="-1"></a><span class="co">#&gt; Strumigenys sanctipauli                                                       Unidentified Guild</span></span>
+<span id="cb3-152"><a href="#cb3-152" tabindex="-1"></a><span class="co">#&gt; Brachymyrmex micromegas                                                       Unidentified Guild</span></span>
+<span id="cb3-153"><a href="#cb3-153" tabindex="-1"></a><span class="co">#&gt; Camponotus tripartitus                                                        Unidentified Guild</span></span>
+<span id="cb3-154"><a href="#cb3-154" tabindex="-1"></a><span class="co">#&gt; Diaphoromyrma sofiae                                                          Unidentified Guild</span></span>
+<span id="cb3-155"><a href="#cb3-155" tabindex="-1"></a><span class="co">#&gt;                                                               delabie_guild</span></span>
+<span id="cb3-156"><a href="#cb3-156" tabindex="-1"></a><span class="co">#&gt; Atta sexdens                                        Attini (Fungus-growers)</span></span>
+<span id="cb3-157"><a href="#cb3-157" tabindex="-1"></a><span class="co">#&gt; Camponotus atriceps                      Omnivorous soil-and-litter species</span></span>
+<span id="cb3-158"><a href="#cb3-158" tabindex="-1"></a><span class="co">#&gt; Crematogaster sp                         Omnivorous soil-and-litter species</span></span>
+<span id="cb3-159"><a href="#cb3-159" tabindex="-1"></a><span class="co">#&gt; Cyphomyrmex minutus                                 Attini (Fungus-growers)</span></span>
+<span id="cb3-160"><a href="#cb3-160" tabindex="-1"></a><span class="co">#&gt; Cyphomyrmex rimosus                                 Attini (Fungus-growers)</span></span>
+<span id="cb3-161"><a href="#cb3-161" tabindex="-1"></a><span class="co">#&gt; Ectatomma edentatum               Large Ponerinae (Large epigeic predators)</span></span>
+<span id="cb3-162"><a href="#cb3-162" tabindex="-1"></a><span class="co">#&gt; Heteroponera mayri                                       Unidentified Guild</span></span>
+<span id="cb3-163"><a href="#cb3-163" tabindex="-1"></a><span class="co">#&gt; Holcoponera striatula                                    Unidentified Guild</span></span>
+<span id="cb3-164"><a href="#cb3-164" tabindex="-1"></a><span class="co">#&gt; Monomorium floricola                                     Unidentified Guild</span></span>
+<span id="cb3-165"><a href="#cb3-165" tabindex="-1"></a><span class="co">#&gt; Monomorium pharaonis                                     Unidentified Guild</span></span>
+<span id="cb3-166"><a href="#cb3-166" tabindex="-1"></a><span class="co">#&gt; Pheidole megacephala                     Omnivorous soil-and-litter species</span></span>
+<span id="cb3-167"><a href="#cb3-167" tabindex="-1"></a><span class="co">#&gt; Strumigenys emmae             Cryptic species (Small specialized predators)</span></span>
+<span id="cb3-168"><a href="#cb3-168" tabindex="-1"></a><span class="co">#&gt; Strumigenys rogeri            Cryptic species (Small specialized predators)</span></span>
+<span id="cb3-169"><a href="#cb3-169" tabindex="-1"></a><span class="co">#&gt; Nylanderia fulva                                         Unidentified Guild</span></span>
+<span id="cb3-170"><a href="#cb3-170" tabindex="-1"></a><span class="co">#&gt; Odontomachus chelifer             Large Ponerinae (Large epigeic predators)</span></span>
+<span id="cb3-171"><a href="#cb3-171" tabindex="-1"></a><span class="co">#&gt; Oxyepoecus reticulatus                                   Unidentified Guild</span></span>
+<span id="cb3-172"><a href="#cb3-172" tabindex="-1"></a><span class="co">#&gt; Pachycondyla striata              Large Ponerinae (Large epigeic predators)</span></span>
+<span id="cb3-173"><a href="#cb3-173" tabindex="-1"></a><span class="co">#&gt; Apterostigma serratum                                    Unidentified Guild</span></span>
+<span id="cb3-174"><a href="#cb3-174" tabindex="-1"></a><span class="co">#&gt; Brachymyrmex delabiei                    Omnivorous soil-and-litter species</span></span>
+<span id="cb3-175"><a href="#cb3-175" tabindex="-1"></a><span class="co">#&gt; Brachymyrmex feitosai                    Omnivorous soil-and-litter species</span></span>
+<span id="cb3-176"><a href="#cb3-176" tabindex="-1"></a><span class="co">#&gt; Camponotus fallatus                      Omnivorous soil-and-litter species</span></span>
+<span id="cb3-177"><a href="#cb3-177" tabindex="-1"></a><span class="co">#&gt; Camponotus hermanni                      Omnivorous soil-and-litter species</span></span>
+<span id="cb3-178"><a href="#cb3-178" tabindex="-1"></a><span class="co">#&gt; Camponotus xanthogaster                  Omnivorous soil-and-litter species</span></span>
+<span id="cb3-179"><a href="#cb3-179" tabindex="-1"></a><span class="co">#&gt; Pheidole aberrans                        Omnivorous soil-and-litter species</span></span>
+<span id="cb3-180"><a href="#cb3-180" tabindex="-1"></a><span class="co">#&gt; Pheidole fimbriata                       Omnivorous soil-and-litter species</span></span>
+<span id="cb3-181"><a href="#cb3-181" tabindex="-1"></a><span class="co">#&gt; Pheidole obscurithorax                   Omnivorous soil-and-litter species</span></span>
+<span id="cb3-182"><a href="#cb3-182" tabindex="-1"></a><span class="co">#&gt; Pheidole subarmata                       Omnivorous soil-and-litter species</span></span>
+<span id="cb3-183"><a href="#cb3-183" tabindex="-1"></a><span class="co">#&gt; Strumigenys fridericimuelleri Cryptic species (Small specialized predators)</span></span>
+<span id="cb3-184"><a href="#cb3-184" tabindex="-1"></a><span class="co">#&gt; Heteroponera inermis                                     Unidentified Guild</span></span>
+<span id="cb3-185"><a href="#cb3-185" tabindex="-1"></a><span class="co">#&gt; Oxyepoecus browni                                        Unidentified Guild</span></span>
+<span id="cb3-186"><a href="#cb3-186" tabindex="-1"></a><span class="co">#&gt; Sphinctomyrmex stali                                     Unidentified Guild</span></span>
+<span id="cb3-187"><a href="#cb3-187" tabindex="-1"></a><span class="co">#&gt; Strumigenys sanctipauli       Cryptic species (Small specialized predators)</span></span>
+<span id="cb3-188"><a href="#cb3-188" tabindex="-1"></a><span class="co">#&gt; Brachymyrmex micromegas                  Omnivorous soil-and-litter species</span></span>
+<span id="cb3-189"><a href="#cb3-189" tabindex="-1"></a><span class="co">#&gt; Camponotus tripartitus                   Omnivorous soil-and-litter species</span></span>
+<span id="cb3-190"><a href="#cb3-190" tabindex="-1"></a><span class="co">#&gt; Diaphoromyrma sofiae                                     Unidentified Guild</span></span>
+<span id="cb3-191"><a href="#cb3-191" tabindex="-1"></a><span class="co">#&gt;                                                               silvestre_guild</span></span>
+<span id="cb3-192"><a href="#cb3-192" tabindex="-1"></a><span class="co">#&gt; Atta sexdens                                               Unidentified Guild</span></span>
+<span id="cb3-193"><a href="#cb3-193" tabindex="-1"></a><span class="co">#&gt; Camponotus atriceps                        Generalist patrolling Camponotines</span></span>
+<span id="cb3-194"><a href="#cb3-194" tabindex="-1"></a><span class="co">#&gt; Crematogaster sp              Small arboreal species with massive recruitment</span></span>
+<span id="cb3-195"><a href="#cb3-195" tabindex="-1"></a><span class="co">#&gt; Cyphomyrmex minutus                     Cryptic fungus-growing ants (Attines)</span></span>
+<span id="cb3-196"><a href="#cb3-196" tabindex="-1"></a><span class="co">#&gt; Cyphomyrmex rimosus                     Cryptic fungus-growing ants (Attines)</span></span>
+<span id="cb3-197"><a href="#cb3-197" tabindex="-1"></a><span class="co">#&gt; Ectatomma edentatum                                           Large predators</span></span>
+<span id="cb3-198"><a href="#cb3-198" tabindex="-1"></a><span class="co">#&gt; Heteroponera mayri                                         Unidentified Guild</span></span>
+<span id="cb3-199"><a href="#cb3-199" tabindex="-1"></a><span class="co">#&gt; Holcoponera striatula                                      Unidentified Guild</span></span>
+<span id="cb3-200"><a href="#cb3-200" tabindex="-1"></a><span class="co">#&gt; Monomorium floricola                                       Unidentified Guild</span></span>
+<span id="cb3-201"><a href="#cb3-201" tabindex="-1"></a><span class="co">#&gt; Monomorium pharaonis                                       Unidentified Guild</span></span>
+<span id="cb3-202"><a href="#cb3-202" tabindex="-1"></a><span class="co">#&gt; Pheidole megacephala                                  Dominant soil omnivores</span></span>
+<span id="cb3-203"><a href="#cb3-203" tabindex="-1"></a><span class="co">#&gt; Strumigenys emmae                                          Unidentified Guild</span></span>
+<span id="cb3-204"><a href="#cb3-204" tabindex="-1"></a><span class="co">#&gt; Strumigenys rogeri                                         Unidentified Guild</span></span>
+<span id="cb3-205"><a href="#cb3-205" tabindex="-1"></a><span class="co">#&gt; Nylanderia fulva                                           Unidentified Guild</span></span>
+<span id="cb3-206"><a href="#cb3-206" tabindex="-1"></a><span class="co">#&gt; Odontomachus chelifer                                         Large predators</span></span>
+<span id="cb3-207"><a href="#cb3-207" tabindex="-1"></a><span class="co">#&gt; Oxyepoecus reticulatus                                     Unidentified Guild</span></span>
+<span id="cb3-208"><a href="#cb3-208" tabindex="-1"></a><span class="co">#&gt; Pachycondyla striata                                          Large predators</span></span>
+<span id="cb3-209"><a href="#cb3-209" tabindex="-1"></a><span class="co">#&gt; Apterostigma serratum                                      Unidentified Guild</span></span>
+<span id="cb3-210"><a href="#cb3-210" tabindex="-1"></a><span class="co">#&gt; Brachymyrmex delabiei                        Soil and vegetation opportunists</span></span>
+<span id="cb3-211"><a href="#cb3-211" tabindex="-1"></a><span class="co">#&gt; Brachymyrmex feitosai                        Soil and vegetation opportunists</span></span>
+<span id="cb3-212"><a href="#cb3-212" tabindex="-1"></a><span class="co">#&gt; Camponotus fallatus                        Generalist patrolling Camponotines</span></span>
+<span id="cb3-213"><a href="#cb3-213" tabindex="-1"></a><span class="co">#&gt; Camponotus hermanni                        Generalist patrolling Camponotines</span></span>
+<span id="cb3-214"><a href="#cb3-214" tabindex="-1"></a><span class="co">#&gt; Camponotus xanthogaster                    Generalist patrolling Camponotines</span></span>
+<span id="cb3-215"><a href="#cb3-215" tabindex="-1"></a><span class="co">#&gt; Pheidole aberrans                                     Dominant soil omnivores</span></span>
+<span id="cb3-216"><a href="#cb3-216" tabindex="-1"></a><span class="co">#&gt; Pheidole fimbriata                                    Dominant soil omnivores</span></span>
+<span id="cb3-217"><a href="#cb3-217" tabindex="-1"></a><span class="co">#&gt; Pheidole obscurithorax                                Dominant soil omnivores</span></span>
+<span id="cb3-218"><a href="#cb3-218" tabindex="-1"></a><span class="co">#&gt; Pheidole subarmata                                    Dominant soil omnivores</span></span>
+<span id="cb3-219"><a href="#cb3-219" tabindex="-1"></a><span class="co">#&gt; Strumigenys fridericimuelleri                              Unidentified Guild</span></span>
+<span id="cb3-220"><a href="#cb3-220" tabindex="-1"></a><span class="co">#&gt; Heteroponera inermis                                       Unidentified Guild</span></span>
+<span id="cb3-221"><a href="#cb3-221" tabindex="-1"></a><span class="co">#&gt; Oxyepoecus browni                                          Unidentified Guild</span></span>
+<span id="cb3-222"><a href="#cb3-222" tabindex="-1"></a><span class="co">#&gt; Sphinctomyrmex stali                                       Unidentified Guild</span></span>
+<span id="cb3-223"><a href="#cb3-223" tabindex="-1"></a><span class="co">#&gt; Strumigenys sanctipauli                                    Unidentified Guild</span></span>
+<span id="cb3-224"><a href="#cb3-224" tabindex="-1"></a><span class="co">#&gt; Brachymyrmex micromegas                      Soil and vegetation opportunists</span></span>
+<span id="cb3-225"><a href="#cb3-225" tabindex="-1"></a><span class="co">#&gt; Camponotus tripartitus                     Generalist patrolling Camponotines</span></span>
+<span id="cb3-226"><a href="#cb3-226" tabindex="-1"></a><span class="co">#&gt; Diaphoromyrma sofiae                                       Unidentified Guild</span></span>
+<span id="cb3-227"><a href="#cb3-227" tabindex="-1"></a><span class="co">#&gt; Step 3: Generating plots...</span></span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --><img role="img" src="data:image/png;base64,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" /><!-- --><img role="img" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASAAAAEgCAMAAAAjXV6yAAABgFBMVEUAAAAAADoAAGYAOmYAOpAAZrYAsPYAv306AAA6ADo6AGY6OgA6Ojo6ZmY6kNtNTU1NTW5NTY5Nbo5NbqtNjqtNjrVNjshTf81ZTU1eTY5eneRkTU1kTVNkov9mAABmADpmOgBmOmZmkNtmtttmtv9uTU1uTW5uTY5ubo5ubqtujoNujo5ujshunZ1uq6tuq7Vuq+Rutf9/zf+Djm6OTU2OTV6OTW6OTY6OWU2Obk2Obm6ObquOg02Ojk2Ojm6Ojo6Oq6uOyP+QOgCQZmaQkDqQkGaQkLaQtpCQttuQ2/+jpQCraV6rbk2rbm6rbo6rjk2rq26rq46rtY6ryKur5Mir5OSr5P+2ZgC2tpC2ttu225C22/+2///Ijk3Ijm7IyI7I5I7I5KvI/8jI/+TI///Nq27bkDrbtmbb29vb/7bb/9vb///kq2Pkq27k5Kvk/8jk/+Tk///na/Pr6+v4dm3/tmb/yI7/25D/27b/5Kv//6L//7b//8j//9v//+T////kXs1KAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAPdElEQVR4nO2dC3sbRxWGlbQC00JkxyDaAqGAHePSUAHGpi20yFwDVmkIyIVGBaeuy00tQliuiKz9650z1zOr3T2SPbvYo/M9cbyamR3tvp7LSvPt2VrCKlTt/30AV10MiBADIsSACDEgQgyIEAMixIAIxQ/otLYhf59941Fyvv/0PzML5WSe1GrxAzqs1eXvk5sFgHIylwHQ2crnb9yHDRJQdnL0gE5u/nnlViLQiMZwSwH68Nla7cY3Ie3pd56FLS9zpfbUfbdz9IDO9+vyxBED6DdCGyoNtlDmKSTcMISWABAM0WqYNl3sfP/mu9Dz6gCoDrzqOFPA+bB2S++9BGPQoTjzJ3dgmEZj0N/e+dlKDQDByCNzTebZyi28d/yAzlZkJwIQFpBOq2tcohNiQBt49/i7mB5voM8YBk/u1L7wyz/9/Q4DShLTpZ7cgbHZY6DGoAxAfheLHdCpHm4PxdB7In4UAzEyf/JiDUZkB0hnykH67I65Wooe0KGesE/FiHOiZ3IzufuAvGm+ZvpZ7IDU9JUkcr568mKt/g9gIFpP7alfi+kNAbKZcKF441umgtgBhRADIsSACDEgQgyIEAMixIAIMSBCDIgQAyIUPaBhemMmoWiDAREbDIjYYEDEBgMiNhgQsbEEgD5zIbn9GRADYkCFYkCEGBAhBkSIARFiQIQYECEGRIgBEWJAhBgQIQZEqExA/Uaj0c7KGG8dX+xoxY65+04P2q5IUcHFDqhEQP31QTLZac19lPNpDkBJMcnFVB6gyZ4+0mnnQaPRGomfZLz9O2hU462j7UEy7XQnO42142T87VfXjvXmlvoRpdfU+ektm23Oe7wpa1IVQvbtV10LerwjGm/DVgr126ome283VrumRvi12oVK9Wv3zmUDGokGJP+u04OmOJ2mPPTNFqSPt97vdMXJDXrq5aY4Nb2pAAHcftNghi2brQFNdruoQpndmO1iIrkPb95GVU121gejNZMH7W60/pEt694ZNBwOLwZoaL90LQCk3qbXFi0FWguckz5/8a8vDqcFR6NT0SYAEqev26Hactmo54hEBDRjDIKddSFU1U5bNl6c58q6dy6/BUlA0IKyAI23/92RL6cdk4o3RQdaVUeqtly2+NdrNKBNQV9wFcKfAjI8QNDTVAdyVUkEvbbJ2x5oQOo1eueyAaExKAPQtPNwe5DbgiRg2UX11kwLgnagXxW0IHkIeFyHqnbl4Xh5rqz/zqUCSvowIopZLBOQuAZo4YFHb8LRi/3gENVhmq30GCRrumuB5o9Bpn5b1WSniWoErGLOsGXdO5cPCCYEOOhsQOLs0NxkJxVx7fRd8bfs2bmklzOLiYJi3rK988CbxY6nB2vvH8hZTPdPV9Vk9w0zi9lfehaD173KZrGrqplhuFgMiNDyAVpQDIgQAyLEgAgxIEIMiBADIsSACDEgQgyIEAMixIAIscuVEAMixIAIMSBC/1lMaicGxICsGBAhBkSIARFiQIQYEKFggJ7cqRllxzW9pgragk5U4EUvUt51V0hAGs0ptyAGdDFApot5sRavu4ICUlEEoxqCeJqndC0BWd+c99qY8Lxy0kzV+I7nmTblwODVTBWeqScYoCqvg9KAtLIAFZQDL/D0oDVTviRAVcq56Y0x/dhYybVVT6bD9hGYylcfOqO4tZwrDOPtgfMFonqsrjmgTevS1DZOYx1Hnk/PVO7snrZh+YCcHTSRRvIFAQ2NzLGiLrZhell1XcydmzYCI3s4poOM4tYwrBzSaUDIUKx0zVuQ98dH9vAMQMhU3jMtSLrG04V1vta1BKR8mN7wYVqQs4enAakc10LU/779v+QWVFkXS3rNRE5AyHftxiB3T0yGqRyNMSOwRYv/tHk9awwKDEjpydfvz6QFV68Bd1dhQNpK7qzjyk5+hKcnIOIs5/KOKmde9+uxCg8oOc15/s31VBmA+NN8MaBDbkHFg/SNCsag6lRCC4pLDIgQAyIUEBB8JX0oH5sUk8IBks/9Oazzsk+SA+iwrv874Wk++xtFaDgAiC8UCwCBGFAmoPN9++TDqLpYOBOneRZrZIN0QJereloZPNsuJoW0AcvHR8b1SYx90qT+O78YEAPKEAMixIAIMSBCwQDF6nLlFkSIAREKCgg9nT0ahQQkPtCf729E9mE1JCD5pfStyJaeQwM6qUf2hVlIQPCFq6AT1xdmQQHBt4qHkX3hERRQjLqygKTNDvkGpWwYzhaYn6SHKrysu1MqKKCQ10GjN1u5gcW1O7Es9TH3kIDO98N9HT3t/OH1wUQFFj/yHOOJdKHimLc2W7rAX7MRcFFwcZ1hQ5/LGLd3uyr4rY1abqKf7yH4IQGFvESEcOVtZMTcRHF94QRSgFBgcuvrxcHFdYYLfQ4BvwVS8ctFLbc79JCRfAFAQ6wsQOIyOhggceSjpm9ftv0NBgk5BjWxi9N4eDuzYc0TlGEiU28P3nvQ9COT2x1wHwvZggJeIk4PGjrgeAYgaCupFmR62mA2rLkMU+5nyHjbj/eOth7veQZzE428LEABfdJyJum1C1pQFiC/BSWJDS4+24KS3k9fnnYeNJNU1HK5Q2ktKJz6MAqMmtmA0BjkTOA2MLl1huPg4m5wMobyUUONQsh6bnfAtyJcTUDTtySI3T/KwOJHKUBoFnMmcHNP1Bc73dmw5jpjjEKfyznMPlhD1dcreRZLkhPoYeXf0+tfyqXy8i6Q5r9yKu06qLq7nvvZl9AwtK9mxRvPzchSeVfSUd43z4AIXc8uVqGCAqpqkK5SYQFFKAZEKBigKu96rlLcggiFBMTTvNmJAV0E0Im1v0TlAw7pco1sVV6JbcCEggKCldWQSxtXQUEByVvGIiP02VnpnAuPQXHNYgyIUEhAUX7dERSQiqMYFZ/AgCIUAyIUFFCMNuCQgCK7AlIqYZrP1hzrdqRrrLCOfmthU9XMDhk1hG1BlwQkV4YXe9Kw27kk11nQMajoEtEcPTSTdmK8Xrdf65rFcl0EvF843qh9ULjYw1nNdDVuX7xeX/AWemuy97ZZkPdKoGBwZQAq/E4a2TGkJaxtLBcmhqguAqYCbbhwtjFtAXNeMl2N2zfl+Mh7C7012VkfjNZsWEBbQkbOa3sPnK9smkft3xi6lGlHW7wSMwa1rQnMGcW86KMWxN4x2td5horewgQs3Wlrv5BfIsM0Wj2gnraOJdr2pS1eqIg2gRlA6eijyKri9kWus6K30FtyoFP+LK+ETigL0FxdbMdYM+2f17pxzAmmWlA6+qii1kZ5ideCit7CBCwVgPwWZN+k/BaUE4kTe+buOq/XqhlxEtzIcLzRmeij9tddtG/a+ZrzFnprstPEYZZtCT0GYUgldLHs26HUANME99ftV9vG6wV+MDtt2ONyU4qbVlJdTFWDphyYxei30FuT3TfQLOZKlDyLGUALfNQId+mS6zrLegv/Yiv/IIbDYQag4TwyVVwiEudCti9aWa6zvLdwgMiDKGGQjut2qMqm+euqZQTkIo5njj7+aBYM0DVaViUA+aNZWEBXbUHDfCi1t0HZ52rID7QyibgdKnJA+kOp/tzqnqthPtC669DM26GS+AG17U0s6edq6A+n6HNN5u1QkQOyH0qTSeq5Gj13u5VhmHk7VPyA0G1QiX2uhvtAi1oQaOZ2qICArmD8IPSh1H+uBvpAS9wOFQzQlRT6UJp6rob6QDs9sLNY3u1QsQO6yGe9cq6DrqQuBKikK+lYxYAIMSBCDIjQzEnPw4UBzbvBgIgNBkRsLAGg32BBAgPyxYAIMSBCDIgQAyLEgAgxIEIMiFCpgEaNRmN91pWS4ePKUe7KJ6xRrGXlzVO3K5Bd2nsYdpmA+nAKvVlClzQFjbcHsCiR9DPYLwA//0iqAqS+7xTvBsu6P2mLE/tYrgTDt+RH2MqlVnz1MnHilojVKpZ+7cJqGke0qH/aedBotEbqwdibOlanPuviWnHpnvSl+UvTVQCybmNY1h21xD9nT8aGZL3iqzP1ErHK/chaoV1YTbWypeqeHoCBumncwmMUG7e41lTpaafrL01XA0iHCVXOv9cH73XdSjDuCfqbdZ2JbNEJskm7r9/Vd+ojaQyDE4MfUwVyOhfXmioNo9rM0nTpgOzqgFrdheC1zp6MDclqxVdnmiXibe17NR5nsyyMGubdrgcILyZTtfqlITm9NF0BIDcGyT/Smy20EpweS/XdBZ5jWQNyq3jaLCzORjXOXhsBcovJruKCWnFpqCG1NF0JIDuLjc09GG4lGBuS9YqvztRLwSr3yC4Nu7CacjEdZjE5SFtAbjFZUSiu1SutFgq9pelqAJnrIDUOvnVsVoKnB/4splZ8daZJxrPYajdBYTV76i6f9Bhk3dG6BRXXiko/llGrW/7SdDWAsMYvEwudc6+CFsXhvHiteaoKUF/+/YIAyovDeclaszQcDj1Ac1nISSN5XKqsi11XLSOghXzSDGhW3hgXN6AAPunIAV3eJx07oEv7pCMHdHmfdPyALumTjhzQ5X3SkQO6vE86dkCX9kkzoBnxlfRCYkCEGBAhBkSIARGaOWkG5IsBEWJAhBgQIQZEiAGVLAZEiAERYkCEGBAhBkSIARFiQIQYEKFoAU125F0UPfjfGFFRmgv4bVLMwr6/X7SA4NwgAvf2ANbNmiM4eZT2yu7vm2BDdin3tv7S1FZ1tF+8LUhHFxan2G9NOz9efagXZ3XaS18Cb37bL2XCL6OUeAFJb/luV7YEcHxYv7lLU5s4RTUdb79oAcESNKyqibHk473HO417emkap33ZT/nrc40XZsq0YgWkWwJs9lv91uSHzx/7af967hXbgkyp/331++n9dmMF5CKci61ee/rb54+9tKOvfE3f4YBL/eh76ZROrICmB+ZJE32xoVoQSru3+YMW3ArhUl5a/wBaUHq/aFuQuZ4xdwLdQ9dBIu2Dhn7ChSvVFwkvzOwX7RgUTAyIEAMixIAIMSBCDIhQvIDO9xd4CMYn7yZnn8ssGTMg+cDYk3mCP+fAAUUPaK6nPSw5oLNnfl67+Qi6XB1Y/KJWg4fzmNciUz6fGCDZMr9aqdUU2OgBHd58dLZSV89IhZ+zFWBVR6/rqgWJH5cmCOq+GTMgE3/+bMWE6z8FWhsSSPp1ZloSNyDzVG95qvKpaWJLvhD9znttAKXTEgbEgBIDCC6IbPd55pF9jQGl05IlApQ7SOsW5Q3SywgowdN8Hb+GzMNa3ZvmlwFQjgquCTPFgAgxIEJLB2hRMSBCDIgQAyLEgAgxIEIMiNCn58XdDxtnFngAAAAASUVORK5CYII=" /><!-- --><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+<pre><code>#&gt; 
+#&gt; ********************************************************************************
+#&gt; IMPORTANT NOTICE: Please verify all assigned guilds. &#39;Unidentified Guild&#39; means
+#&gt; the taxon was not found in the respective database.
+#&gt; ********************************************************************************
+#&gt; 
+#&gt; &gt;&gt;&gt; Checking exotic species
+#&gt; Step 1: Preparing community data...
+#&gt; Step 2: Generating results...</code></pre>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+<pre><code>#&gt; 
+#&gt; ********************************************************************************
+#&gt; EXOTIC SPECIES DETECTED:
+#&gt;                species abundance percentage
+#&gt; 1 Monomorium floricola        18   4.128440
+#&gt; 2 Monomorium pharaonis        17   3.899083
+#&gt; 3 Pheidole megacephala        16   3.669725
+#&gt; 4    Strumigenys emmae        15   3.440367
+#&gt; 5   Strumigenys rogeri        14   3.211009
+#&gt; 
+#&gt; DATA SOURCE AND REFERENCE:
+#&gt; The exotic species list used in this function is sourced from:
+#&gt; VIEIRA, Vitória Brunetta. &#39;Quem são e onde estão as formigas exóticas do Brasil?&#39;
+#&gt; Dissertação (Mestrado em Entomologia) – Universidade Federal do Paraná (UFPR),
+#&gt; Curitiba, Brasil, 2025.
+#&gt; ********************************************************************************
+#&gt; 
+#&gt; &gt;&gt;&gt; Checking Atlantic Forest endemic species
+#&gt; 
+#&gt; ================================================================================
+#&gt; ATTENTION: This function identifies endemic species of the BRAZILIAN ATLANTIC FOREST.
+#&gt; If your data collection did not occur within this biome, this analysis may not
+#&gt; be appropriate for your study.
+#&gt; ================================================================================
+#&gt; Step 1: Preparing community data...
+#&gt; Step 2: Generating results...</code></pre>
+<p><img role="img" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASAAAAEgCAMAAAAjXV6yAAABPlBMVEUAAAAAADoAAGYAOjoAOmYAOpAAZrYse7Y6AAA6ADo6AGY6OgA6Ojo6OmY6ZmY6ZpA6ZrY6kLY6kNtNTU1NTW5NTY5NbqtNjo5NjshmAABmADpmAGZmOgBmOmZmkJBmkNtmtrZmtttmtv9uTU1uTW5uTY5ubk1ubo5ubqtujshuq6tuq+SOTU2OTW6OTY6Obk2Ojo6Oq6uOyP+QOgCQOmaQZgCQZjqQZmaQkGaQkLaQtpCQttuQ27aQ2/+rbk2rbm6rbo6rq26r2emr5Mir5P+2ZgC2Zjq2kDq2tpC2ttu225C229u22/+2///Ijk3IyI7I5KvI/+TI///bkDrbtmbbtpDb27bb29vb/7bb/9vb///kq27k5Kvk///r6+v/tmb/yI7/25D/27b/29v/5Kv//7b//8j//9v//+T///+WIfJqAAAACXBIWXMAAA7DAAAOwwHHb6hkAAANP0lEQVR4nO2di3/bthHHJSfRlHTtNsvOpCzbWtvd2tnrVnmPbK3dPay12xyvs9I9rKWUUss2/v9/YLjD4UVROsmiaNK63yexSAI8AF8CBwoUgZoSzVTtrjNQdgkgRgKIkQBiJIAYCSBGAoiRAGK0DKB+DfXwk4XOGv3wpbo+fHQxV+S/1GoNGzOp7fAGpgRSVmsbL+fNojtvrnxmy6ZKGZ/3rI35ASXaeMPu9GhzpoEpgYsB6m/kBMjYeVWbszqkU+eVBOxHzW/Xj6yBmYCWTDQCtJEDINXbeHl92OjXNk7Vm+e6yZ0qNe5sJs3aQyyQPYZx6k19HTdN+XzAoy/eqtV/7AzbgF54zfsbf2tuQmRv4NVbNTzNGYgCbfppQFF+KM9v6311/Rtt7j0ykjugB01dkRIofk1f6HHnnabZUu4Yxnn43BUhCIhbqgsIAeni4FkBg749zRkIAhOyMQEozs+ji1EqGzu5A3qlfYM2aq7ue9BuH12MO9q5Xn9uQuiYieNaSBTQgOI2LAobEDYx2DS73oC+/LrlYRrWgA/URX5ly2lZYmCcHx1R73+lrYya371Ac/n5IPJ8SB9sonVdo+pH4w76CF23/DETxxUhHTDuECAfEALSpihK4IP+/cVvm3gRnAFvfTMjqzownSxF7ENOH/zo7+GVzwvQ28aNXEBiWJ4EAGE2+vUjf4wK5YsQB+g2ZAHZgACQaQjY4BwgOtZQgYGUdZdVV+R0som/ytCia985zd9JqwIA2dq66Q3oZvzO7/76n05ugNRXz801WCGguIlBJQ6rdApQHBAAmmxidC6ajRkYH5QBKG5iAaA42RTJf/1aJ7kyQJGT/t6kkzaA0GXFTjoClOWkE3K3QM0a0EW9gD46MuCt641Rx94t+axOJlvX3wTe6EuZ6Cyr688phZUAUkE3/6BJLiPoVg2gjG4+AuQDPKAeZTnRyK0B27nHgKJu3rfQzG7e5Nm2XbJn7h9sN5/HnXQASI3cjWJDZwQcnj9mm8nzWuO/pnZHAR6QC3CAXA8HjdYZwDu+T/AuzBnw1vWNInTgE1lN5wf3H0BMvFHUXT0aucgB0Ay5ElVeAoiRAGIkgBjJiCIjAcRIADESQIwEECMBxEgAMRJAjJYAZAe5mWjJjCcub04zt0ePj8JYqd35zc+woVObadZpKUAwJpBwhGaUIMzitO3J3bnNzxCYLAiQ+TtDAmiThtTt545pfeZBQ63+gkoAxxqQtd83qV1C7E06brbJjs26232B41h4WP9xJqx5F4+OU1IuGyo+jVJGs2Fug1z63C7fxHTOx50d8+AES9DcMWN7MPC6qcNM2nAM/o+aNKxscu2PPz6K7Si/24RBw4YHRCas+TAefEJcOGazYQGlUg6j22jhqSa3yztpneI3F5SFJ+Y6JKb27CT2KY09lkApdlyjgQ93XG87OybY7dIpHpDZt+Yz4wXZUHGwBxSY8dFUnNula5B5fpG4J0v4aI+GefGyELUEt30pHaDwONlx3oF2n5gS+CZmPr354DRb4iAbFlAqZWcmiGZP9blaGhDYHHfq1udpt7DxkuqrWhSQteOaGO0ygKLTQkDBL0BmAQqirQgQmkvowQM0rXpcUXEbn1JYPxUACo5bOxQc7YZNLAQRJB+FK58jBlAqmopzm0svBuZGzbrJsU7DPHcxz1cnnHSQzdAdwra1YwHZXXLS4JTheZc1Yc1Hp2HyDTJrspEBCFLz0X00f6rN7fJOGihp31P/FEpIz7MgCD4zu3mfTfzRmO1YYZvs+GDafWGiQO/87jNfUms+PM30jL6vpuqRAgSpRdFtLcqzm18PCSBGAoiRAGIkgBgJIEYCiJEAYiSAGN0VoK+rkogAYiSAGAkgRgKIkQBiJIAYCSBGAohRxQD9aXWakqIAEkACSAB5CSBGAoiRAGJUKUBf34FWCCiVUg6AltI61KClJIAYCSBGAoiRAGIkgBgJIEYCiJEAYiSAGAkgRgKIkQBiJIAYCSBGAoiRAGIkgBjdA0DDFmhfXe62Wk9fq0Gr1VXq8v3z25UsrXsACDTcPlfDNmxd/fxkqDGddW9XsAndD0BXB5rH2T5s6qoD/z54fbuCTeh+ABroOnPz2QlsmhoUVSB57HNz3AUyP2ltaUbgg/KrQPejBqFHvtw7UVcfoWvWwIboqnPQvQA0aNOGbl/wMWzrjZz6sXsByLhnZQFpb6TpEKxldR8AoQvCnt74Ht3fSw0KRXVFe+ftc7srPqgoVRNQOA/KilVBQOOOn6c8mO5jRaoeoPEPgrnAop2VqHqACpYAYlRVQNoRFeCAVHUB9XbcnFqrVfUAoV++PhRAKYXdPM6IKE0sVtjEaF2gQlRJQH6NodWrooDgLnqhNUFvrQoCginmYMK6nvigUL4XewZTK+IMeb+SXswrA1Ahqh4g18TmL+PaP/ZZpSpYg4pV9QDJeFC2ohFFugWSEcVAURPryZj0hMQHCSABJIC8BBAjAcTojgEFq96vWpUEFCxHvXJVEhCtb1OIKgkIH/oUpEoCuuViZrdSJQHBQzFx0ilJNy+A8gTUD0c76DWfm2P8Eae87aNotT1YpAplXvNRZ234J2/7KHcfZPsy8zty+PUvveqz9m/7xIDoNR9oVBqSvO0DipoYveZDgORtH1TopOk1HwtIyds+GaJ3M+Rtn2kyzoc69zV/20d76Pirhn3Nx3TzSt72mRC95nN1IG/7kFL3QSuVAGJUQUD0LlTNLMS6alUQkAy5ZkqGXBcAJDUoQ/F3sWDl9RWrkoBkTDpDMuQqgPIE1C/qF3gVBRSPSa9UlQQkXzUyJIAWACRNLEPipBcCtJDW8LFPgapoDcImVsg31moCEic9KenmBVB+gFQC74lJE4uUNR5UxJBQJQEVKQHEqKKA5KvGhOQ+aAFA0s1nSAAtAEiaWIbESS8EqDhVEpD8eCFD8uOFBQDJjxcyNOPHC/C2T1fJ2j7TBOvWDLdOZG2faRriu2JdWdvHqVebGAbStUjW9nF8tIfupwgNnr6WtX1IeBOUuhMawNsIsraPEd4EXR+G3zMGW/Teirzto7IADbYtClnbR2UAgralZG2f6YDOcBHIrqztQyrymY+qIqCCJYAYCSBGAoiRAGIkgBgJIEYCiJEAYiSAGAkgRgKIkQBiJIAYCSBG6wBo3R77FKt1qEFLSQAxEkCMBBAjAcRIADESQIzWENC3VicBJIAEkAASQAJIAAkgASSABND9AzTv2j5rC2jetX3WFdDca/usK6Byre1TnBYFVJK3fYpPZG5AqhRv+xSfyCKASvC2T/GJzOukVTne9ik+kXm7eVWOt32KT4QHVKq1fYpPpGJPNYpPRAAxuitAlZEAYiSAGAkgRgKIkQBiJIAYCSBGAohR3oBgQq8WzdVglTkAkP7SO4B5nIY4nQrZ6F5+mGne2s762nz5wf929zPD6MjU79rTRilyB5SRgXlGSHAGnpvjX7ZDGxOPCIbwVXlIa5hnJTXYv9wFgD7Mbk3ETh0oO6CBue5fvh+WDp6jhIIZwxRO+zQFEA5Z/XG/EoB0RlutfRwg+b5O2wya3Bx/vNtq63bSNnVg146emInABm2cMc3ZSGfaNpO9Px+0tjSKf+DpxvTlT3+xfY7Lv//zD+fW+tbJ1UHLzIIUNDGdJRtAYzmUyUIAGf+hAWhfMNRZPujCRE1w7fWFvzl++vrqQFeAPRyc1GGhawAeUGmMjbarMU5Uo/R5BkAbUiDTl7tdHNPTIeYvzuK3fZ6qQTQmOjSVkM6lTBYDyNWgPfQUUCa/aj1kiP5TmC06XkeI66FpmRn4nFKA9uwTO0wBpjs6w5PN2LA9PgnooGsPUBzKZGaBVtjEMP0BAYJKsZUCNAgA4ZyEWPnMtTVKAaIAKjb9J9NY1o/o6IeE36QTnovRDqBp2jauzx3cIaCgBimlptYg73RN66PDKUCTTppqClmAOTFx9+zjGTUIPqjt2b07BBT4IKj8ESBsTnvOhQ7w0YA6azsbaR8UdPN7rqsn02jBenjo660PMgkEgOAIBdC5hfog46RbXXeNd1s/M73Y1kmqBoW92HHXXsLh9pfTejHssbDb0c3RpWBMG99jQeAEh7smSZOEydi+68VMAHVylMkiAN1Wg/2Mg+n7oLtQWQDRXJaxcptadwmVBVBWFcrxtxK3V2kAlVUCiJEAYiSAGJUUEKyAAsvlqTen/mC4XZjKCQgn/k5qO2r0+MgdDLeLUykB0bzfvUcXAihTblLiUROWGoK/tU3cRkjwB48VsU5KKQHp1kVLMAELnMhZNzrkQoDMZ7MAQuUEZLx0wwD6BpaLISgO0JMCpnRGlRWQghmurQ9KsE8LAcEaF41CclFiQLbWjDv1o3QNUjhDeBEzg5cSEPVXBCWBJZmSehpQQatZlRKQ6sFN4vVhAxnAAsujZv0ItmF9wevD+hGuw1hIv19OQH4twZ52Ndrf1D/VdGAbuvd3nx2RWyogJyUFVB4JIEYCiJEAYiSAGAkgRgKIkQBiJIAYCSBG/wc7mkNJqqZ+QgAAAABJRU5ErkJggg==" /><!-- --></p>
+<pre><code>#&gt; 
+#&gt; ********************************************************************************
+#&gt; ENDEMIC SPECIES DETECTED (ATLANTIC FOREST):
+#&gt;                 species abundance percentage
+#&gt; 1 Apterostigma serratum         9   2.064220
+#&gt; 2 Brachymyrmex delabiei         8   1.834862
+#&gt; 3 Brachymyrmex feitosai         7   1.605505
+#&gt; 4   Camponotus fallatus         6   1.376147
+#&gt; 5   Camponotus hermanni         5   1.146789
+#&gt; 
+#&gt; DATA SOURCE AND REFERENCE:
+#&gt; The endemic species list is sourced from:
+#&gt; Silva, N. S., Gonçalves, D. C. de O., Wazema, C. T., Barbosa, D. A., Prado, L. P. do,
+#&gt; Andrade-Silva, J., Fernandes, T. T., Silva, R. R., &amp; Morini, M. S. de C. (2025).
+#&gt; &#39;Endemism and vulnerability of ants in the phytophysiognomies of the Brazilian
+#&gt; Atlantic Forest&#39;. In: Brazilian Myrmecology: Exploring the World’s Richest Ant Fauna
+#&gt; (Chapter 16). Editora Científica Digital. DOI: 10.37885/250920259.
+#&gt; ********************************************************************************
+#&gt; 
+#&gt; &gt;&gt;&gt; Checking Atlantic Forest rarity patterns
+#&gt; 
+#&gt; ================================================================================
+#&gt; ATTENTION: This function identifies RARITY FORMS specific to the ATLANTIC FOREST.
+#&gt; This classification is based on geographic range, habitat specificity, and 
+#&gt; local abundance. If your data is from another biome, use with caution.
+#&gt; ================================================================================
+#&gt; Step 1: Preparing community data and rarity database...
+#&gt; Step 2: Generating results...</code></pre>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+<pre><code>#&gt; 
+#&gt; ********************************************************************************
+#&gt; RARE SPECIES DETECTED:
+#&gt;                          species rarity_form abundance percentage
+#&gt; 1          Brachymyrmex feitosai      Form 4         7  1.6055046
+#&gt; 2        Brachymyrmex micromegas      Form 7         1  0.2293578
+#&gt; 3            Camponotus atriceps      Form 2        40  9.1743119
+#&gt; 4         Camponotus tripartitus      Form 7         1  0.2293578
+#&gt; 5           Diaphoromyrma sofiae      Form 7         1  0.2293578
+#&gt; 6           Heteroponera inermis      Form 4         2  0.4587156
+#&gt; 7              Oxyepoecus browni      Form 6         2  0.4587156
+#&gt; 8         Oxyepoecus reticulatus      Form 1        11  2.5229358
+#&gt; 9              Pheidole aberrans      Form 2         3  0.6880734
+#&gt; 10            Pheidole fimbriata      Form 2         3  0.6880734
+#&gt; 11        Pheidole obscurithorax      Form 2         2  0.4587156
+#&gt; 12            Pheidole subarmata      Form 2         2  0.4587156
+#&gt; 13          Sphinctomyrmex stali      Form 6         1  0.2293578
+#&gt; 14 Strumigenys fridericimuelleri      Form 3         2  0.4587156
+#&gt; 15       Strumigenys sanctipauli      Form 6         1  0.2293578
+#&gt; 
+#&gt; DATA SOURCE AND REFERENCE:
+#&gt; Silva, N. S., Maciel, E. A., Prado, L. P., Silva, O. G., Barbosa, D. A., 
+#&gt; Andrade-Silva, J., ... &amp; Morini, M. S. (2024). 
+#&gt; &#39;Ant rarity and vulnerability in Brazilian Atlantic Forest fragments.&#39;
+#&gt; Biological Conservation, 296, 110640.
+#&gt; ********************************************************************************
+#&gt; 
+#&gt; =================================================
+#&gt; AntClassify pipeline finished successfully
+#&gt; =================================================</code></pre>
+</div>
+<div id="accessing-results" class="section level2">
+<h2>Accessing results</h2>
+<p>You can access each component of the results:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">names</span>(resultado)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="co">#&gt; [1] &quot;guilds&quot;  &quot;exotic&quot;  &quot;endemic&quot; &quot;rarity&quot;</span></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="fu">head</span>(resultado<span class="sc">$</span>guilds<span class="sc">$</span>table)</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="co">#&gt;                                 species abundance percentage</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="co">#&gt; Atta sexdens               Atta sexdens        50  11.467890</span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co">#&gt; Camponotus atriceps Camponotus atriceps        40   9.174312</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="co">#&gt; Crematogaster sp       Crematogaster sp        35   8.027523</span></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co">#&gt; Cyphomyrmex minutus Cyphomyrmex minutus        30   6.880734</span></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="co">#&gt; Cyphomyrmex rimosus Cyphomyrmex rimosus        28   6.422018</span></span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co">#&gt; Ectatomma edentatum Ectatomma edentatum        25   5.733945</span></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a><span class="co">#&gt;                                                                                      antclassify_guild</span></span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a><span class="co">#&gt; Atta sexdens                                              Fungus-growers (soil or leaf litter nesting)</span></span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a><span class="co">#&gt; Camponotus atriceps Generalist omnivores (dominant or opportunistic in soil, leaf litter, or arboreal)</span></span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a><span class="co">#&gt; Crematogaster sp    Generalist omnivores (dominant or opportunistic in soil, leaf litter, or arboreal)</span></span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a><span class="co">#&gt; Cyphomyrmex minutus                                       Fungus-growers (soil or leaf litter nesting)</span></span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a><span class="co">#&gt; Cyphomyrmex rimosus                                       Fungus-growers (soil or leaf litter nesting)</span></span>
+<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a><span class="co">#&gt; Ectatomma edentatum                  Generalist predators (dominant or cryptic in soil or leaf litter)</span></span>
+<span id="cb8-18"><a href="#cb8-18" tabindex="-1"></a><span class="co">#&gt;                                               silva_guild</span></span>
+<span id="cb8-19"><a href="#cb8-19" tabindex="-1"></a><span class="co">#&gt; Atta sexdens                           Unidentified Guild</span></span>
+<span id="cb8-20"><a href="#cb8-20" tabindex="-1"></a><span class="co">#&gt; Camponotus atriceps                    Unidentified Guild</span></span>
+<span id="cb8-21"><a href="#cb8-21" tabindex="-1"></a><span class="co">#&gt; Crematogaster sp                       Unidentified Guild</span></span>
+<span id="cb8-22"><a href="#cb8-22" tabindex="-1"></a><span class="co">#&gt; Cyphomyrmex minutus                    Unidentified Guild</span></span>
+<span id="cb8-23"><a href="#cb8-23" tabindex="-1"></a><span class="co">#&gt; Cyphomyrmex rimosus                    Unidentified Guild</span></span>
+<span id="cb8-24"><a href="#cb8-24" tabindex="-1"></a><span class="co">#&gt; Ectatomma edentatum Generalist predatory ectaheteromorphs</span></span>
+<span id="cb8-25"><a href="#cb8-25" tabindex="-1"></a><span class="co">#&gt;                                                 delabie_guild</span></span>
+<span id="cb8-26"><a href="#cb8-26" tabindex="-1"></a><span class="co">#&gt; Atta sexdens                          Attini (Fungus-growers)</span></span>
+<span id="cb8-27"><a href="#cb8-27" tabindex="-1"></a><span class="co">#&gt; Camponotus atriceps        Omnivorous soil-and-litter species</span></span>
+<span id="cb8-28"><a href="#cb8-28" tabindex="-1"></a><span class="co">#&gt; Crematogaster sp           Omnivorous soil-and-litter species</span></span>
+<span id="cb8-29"><a href="#cb8-29" tabindex="-1"></a><span class="co">#&gt; Cyphomyrmex minutus                   Attini (Fungus-growers)</span></span>
+<span id="cb8-30"><a href="#cb8-30" tabindex="-1"></a><span class="co">#&gt; Cyphomyrmex rimosus                   Attini (Fungus-growers)</span></span>
+<span id="cb8-31"><a href="#cb8-31" tabindex="-1"></a><span class="co">#&gt; Ectatomma edentatum Large Ponerinae (Large epigeic predators)</span></span>
+<span id="cb8-32"><a href="#cb8-32" tabindex="-1"></a><span class="co">#&gt;                                                     silvestre_guild</span></span>
+<span id="cb8-33"><a href="#cb8-33" tabindex="-1"></a><span class="co">#&gt; Atta sexdens                                     Unidentified Guild</span></span>
+<span id="cb8-34"><a href="#cb8-34" tabindex="-1"></a><span class="co">#&gt; Camponotus atriceps              Generalist patrolling Camponotines</span></span>
+<span id="cb8-35"><a href="#cb8-35" tabindex="-1"></a><span class="co">#&gt; Crematogaster sp    Small arboreal species with massive recruitment</span></span>
+<span id="cb8-36"><a href="#cb8-36" tabindex="-1"></a><span class="co">#&gt; Cyphomyrmex minutus           Cryptic fungus-growing ants (Attines)</span></span>
+<span id="cb8-37"><a href="#cb8-37" tabindex="-1"></a><span class="co">#&gt; Cyphomyrmex rimosus           Cryptic fungus-growing ants (Attines)</span></span>
+<span id="cb8-38"><a href="#cb8-38" tabindex="-1"></a><span class="co">#&gt; Ectatomma edentatum                                 Large predators</span></span></code></pre></div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
