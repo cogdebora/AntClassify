@@ -1,7 +1,7 @@
 # AntClassify
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/seu-usuario/AntClassify/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/seu-usuario/AntClassify/actions/workflows/R-CMD-check.yaml)
+[![R-CMD-check](https://github.com/cogdebora/AntClassify/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/cogdebora/AntClassify/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 AntClassify is an R package designed to **standardize ant community analyses**, particularly for Neotropical and Brazilian Atlantic Forest assemblages. It automates:
@@ -19,7 +19,7 @@ You can install the **development version** of AntClassify from GitHub:
 
 ```r
 # install.packages("remotes")
-remotes::install_github("seu-usuario/AntClassify")
+remotes::install_github("cogdebora/AntClassify")
 ```
 
 Once the package is accepted on CRAN, you will also be able to install it with:
@@ -89,6 +89,6 @@ If you use AntClassify in your research, please cite the following references:
 Additionally, if you use the package itself, please cite:
 
 - Gonçalves, D. C. O., et al. (2026). *AntClassify: An R package for ant community analysis* (Version 0.1.0) [Computer software].  
-  https://github.com/seu-usuario/AntClassify
+  https://github.com/cogdebora/AntClassify
 
 
