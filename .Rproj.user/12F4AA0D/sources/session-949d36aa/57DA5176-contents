@@ -82,7 +82,7 @@ If you use AntClassify in your research, please cite the following references:
 
 - Silvestre, R., Brandão, C. R. F., & Silva, R. R. (2003). Grupos funcionales de hormigas: el caso de los gremios del Cerrado. In F. Fernández (Ed.), *Introducción a las Hormigas de las Región Neotropical* (pp. 113–148). Instituto Alexander Von Humboldt.
 
-- Silva, R. R., Silvestre, R., Brandão, C. R. F., Morini, M. S. C., & Delabie, J. H. C. (2015). Trophic groups and guilds in poneromorph ants. *Sociobiology*, 62(3), 321–329.
+- Silva, R. R., Silvestre, R., Brandão, C. R. F., Morini, M. S. C., & Delabie, J. H. C. (2015).  Grupos trófi cos e guildas em formigas poneromorfas. In: Delabie, Jacques H. C. et al.  *As formigas poneromorfas do Brasil*. Ilhéus: Editus, 2015. p. 163-179.
 
 - Delabie, J. H. C., Agosti, D., & Nascimento, I. C. (2000). Litter ant communities of the Brazilian Atlantic rain
 forest region. *Sampling Ground-dwelling Ants: case studies from the world’s rain forests. Curtin University of Technology School of Environmental Biology Bulletin*,v. 18.
