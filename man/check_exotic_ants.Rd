@@ -4,11 +4,36 @@
 \alias{check_exotic_ants}
 \title{Identify Exotic Ant Species (Brazil)}
 \usage{
-check_exotic_ants(comm)
+check_exotic_ants(comm, verbose = TRUE, plot = TRUE)
 }
 \arguments{
 \item{comm}{A community matrix where species are columns and samples are rows.}
+
+\item{verbose}{Logical; if \code{TRUE}, displays progress messages.}
+
+\item{plot}{Logical; if \code{TRUE}, displays the plot of exotic vs. native proportions.}
+}
+\value{
+Invisibly returns a list with two elements:
+\item{table}{A data frame containing exotic species detected, with columns species, abundance, and percentage.}
+\item{plot}{A ggplot2 object showing the proportion of exotic vs. native species.}
 }
 \description{
 Checks a community matrix for known exotic ant species in Brazil sourced from Vieira (2025).
+}
+\examples{
+# Create a small example community matrix
+species_list <- c(
+  "Pachycondyla striata", "Pheidole megacephala", "Solenopsis saevissima",
+  "Paratrechina longicornis", "Wasmannia auropunctata"
+)
+set.seed(123)
+comm_data <- matrix(
+  rpois(length(species_list) * 3, lambda = 2),
+  nrow = 3,
+  ncol = length(species_list),
+  dimnames = list(paste0("sample", 1:3), species_list)
+)
+result <- check_exotic_ants(comm_data, verbose = FALSE, plot = FALSE)
+head(result$table)
 }

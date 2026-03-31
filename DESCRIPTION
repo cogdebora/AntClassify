@@ -13,9 +13,8 @@ Description: Provides functions for the analysis of ant communities, aiming to
     includes a novel classification system implemented within the package,
     developed from ant species occurring in urban environments.
     It also includes routines to flag exotic species (Vieira, 2025), identify
-    endemic species (Silva et al., 2025, <doi:10.37885/250920259>), and classify
-    species rarity and rarity forms (Silva et al., 2024,
-    <doi:10.1016/j.biocon.2024.110640>).
+    endemic species (Silva et al., 2025), and classify
+    species rarity and rarity forms (Silva et al., 2024).
     The package reduces manual effort and improves reproducibility, supporting
     research and biodiversity management of Neotropical ant communities.
 License: MIT + file LICENSE
@@ -41,3 +40,10 @@ VignetteBuilder: knitr
 Config/testthat/edition: 3
 URL: https://github.com/cogdebora/AntClassify
 BugReports: https://github.com/cogdebora/AntClassify/issues
+References:
+  "Ant rarity and vulnerability in Brazilian Atlantic Forest fragments" Silva, N. S., Maciel, E. A., Prado, L. P., Silva, O. G., Barbosa, D. A., Andrade-Silva, J., ... & Morini, M. S. (2024) <doi:10.1016/j.biocon.2024.110640>
+  "Endemism and vulnerability of ants in the phytophysiognomies of the Brazilian Atlantic Forest" Silva, N. S., Gonçalves, D. C. O., Wazema, C. T., Barbosa, D. A., Prado, L. P., Andrade-Silva, J., Fernandes, T. T., Silva, R. R., & Morini, M. S. C. (2025) <doi:10.37885/250920259>
+  Vieira, V. B. (2024) "Quem são e onde estão as formigas exóticas do Brasil?" Dissertação (Mestrado em Entomologia) – Universidade Federal do Paraná, Curitiba.
+  "Grupos funcionales de hormigas: el caso de los gremios del Cerrado" Silvestre, R., Brandão, C. R. F., & Silva, R. R. (2003, ISBN:9588151236)
+  "Grupos tróficos e guildas em formigas poneromorfas" Silva, R. R., Silvestre, R., Brandão, C. R. F., Morini, M. S. C., & Delabie, J. H. C. (2015, ISBN:9788574554419)
+  "Litter ant communities of the Brazilian Atlantic rain forest region" Delabie, J. H. C., Agosti, D., & Nascimento, I. C. (2000) <[https://www.researchgate.net/profile/Donat-Agosti/publication/44961742_Sampling_Ground-Dwelling_Ants_Case_Studies_from_the_World's_Rain_Forests/links/53e901ef0cf2fb1b9b643d76/Sampling-Ground-Dwelling-Ants-Case-Studies-from-the-Worlds-Rain-Forests.pdf#page=14]https://www.researchgate.net/profile/Donat-Agosti/publication/44961742_Sampling_Ground-Dwelling_Ants_Case_Studies_from_the_World's_Rain_Forests/links/53e901ef0cf2fb1b9b643d76/Sampling-Ground-Dwelling-Ants-Case-Studies-from-the-Worlds-Rain-Forests.pdf#page=14>

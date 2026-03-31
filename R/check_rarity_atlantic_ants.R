@@ -1,18 +1,43 @@
 #' @title Identify Ant Rarity Forms (Atlantic Forest)
 #' @description Checks a community matrix for ant rarity forms in the Brazilian Atlantic Forest based on Silva et al. (2024).
 #' @param comm A community matrix where species are columns and samples are rows.
+#' @param verbose Logical; if \code{TRUE}, displays progress messages.
+#' @param plot Logical; if \code{TRUE}, displays the plot of rarity forms distribution.
+#' @importFrom dplyr group_by summarise mutate
+#' @importFrom ggplot2 ggplot aes geom_col labs theme_minimal theme scale_y_continuous
+#' @importFrom stats reorder
+#' @importFrom scales percent
+#' @return Invisibly returns a list with two elements:
+#'   \item{table}{A data frame containing rare species detected, with columns species, rarity_form, abundance, and percentage.}
+#'   \item{plot}{A ggplot2 object showing the distribution of rarity forms.}
+#' @examples
+#' # Create a small example community matrix
+#' species_list <- c(
+#'   "Ectatomma brunneum", "Pheidole aberrans", "Camponotus crassus",
+#'   "Solenopsis saevissima", "Pachycondyla striata"
+#' )
+#' set.seed(123)
+#' comm_data <- matrix(
+#'   rpois(length(species_list) * 3, lambda = 2),
+#'   nrow = 3,
+#'   ncol = length(species_list),
+#'   dimnames = list(paste0("sample", 1:3), species_list)
+#' )
+#' result <- check_rarity_atlantic_ants(comm_data, verbose = FALSE, plot = FALSE)
+#' head(result$table)
 #' @export
-check_rarity_atlantic_ants <- function(comm) {
+check_rarity_atlantic_ants <- function(comm, verbose = TRUE, plot = TRUE) {
 
-  # --- WARNING ---
-  cat("\n********************************************************************************\n")
-  cat("ATTENTION:\n")
-  cat("This function identifies rare ant species and their rarity forms.\n")
-  cat("This classification is specific to the Brazilian Atlantic Forest and\n")
-  cat("may not be appropriate for other biomes.\n")
-  cat("********************************************************************************\n\n")
+  if (verbose) {
+    message("\n********************************************************************************")
+    message("ATTENTION:")
+    message("This function identifies rare ant species and their rarity forms.")
+    message("This classification is specific to the Brazilian Atlantic Forest and")
+    message("may not be appropriate for other biomes.")
+    message("********************************************************************************\n")
+  }
 
-  message("Step 1: Preparing community data and rarity database...")
+  if (verbose) message("Step 1: Preparing community data and rarity database...")
 
   # (Silva et al. 2024)
   rarity_db <- data.frame(
@@ -77,7 +102,7 @@ check_rarity_atlantic_ants <- function(comm) {
 
   df$percentage <- (df$abundance / total_abs) * 100
 
-  message("Step 2: Generating results...")
+  if (verbose) message("Step 2: Generating results...")
 
   # Plotting
   res_plot <- dplyr::group_by(df, rarity_form)
@@ -96,29 +121,29 @@ check_rarity_atlantic_ants <- function(comm) {
     ggplot2::theme_minimal() +
     ggplot2::theme(legend.position = "bottom")
 
-  # Filtragem para o retorno
+  # Filter for return
   raras_detectadas <- df[df$rarity_form != "Common", ]
   rownames(raras_detectadas) <- NULL
 
-  cat("\n********************************************************************************\n")
-  if(nrow(raras_detectadas) > 0) {
-    cat("RARE SPECIES DETECTED:\n")
-    print(raras_detectadas[, c("species", "rarity_form", "abundance", "percentage")])
-  } else {
-    cat("No rare species from the target list were detected.\n")
+  if (verbose) {
+    message("\n********************************************************************************")
+    if (nrow(raras_detectadas) > 0) {
+      message("RARE SPECIES DETECTED:")
+      print(raras_detectadas[, c("species", "rarity_form", "abundance", "percentage")])
+    } else {
+      message("No rare species from the target list were detected.")
+    }
+
+    # --- REFERENCE ---
+    message("\nDATA SOURCE AND REFERENCE:")
+    message("Silva, N. S., Maciel, E. A., Prado, L. P., Silva, O. G., Barbosa, D. A.,")
+    message("Andrade-Silva, J., ... & Morini, M. S. (2024).")
+    message("'Ant rarity and vulnerability in Brazilian Atlantic Forest fragments.'")
+    message("Biological Conservation, 296, 110640.")
+    message("********************************************************************************")
   }
 
-  # --- REFERENCE ---
-  cat("\nDATA SOURCE AND REFERENCE:\n")
-  cat("Silva, N. S., Maciel, E. A., Prado, L. P., Silva, O. G., Barbosa, D. A., \n")
-  cat("Andrade-Silva, J., ... & Morini, M. S. (2024). \n")
-  cat("'Ant rarity and vulnerability in Brazilian Atlantic Forest fragments.'\n")
-  cat("Biological Conservation, 296, 110640.\n")
-  cat("********************************************************************************\n")
+  if (plot) print(p1)
 
-
-  print(p1)
-
-
-  return(invisible(list(table = raras_detectadas, plot = p1)))
+  invisible(list(table = raras_detectadas, plot = p1))
 }

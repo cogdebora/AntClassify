@@ -1,22 +1,43 @@
 #' @title Identify Endemic Ant Species (Atlantic Forest)
 #' @description Checks a community matrix for ant species endemic to the Brazilian Atlantic Forest based on Silva et al. (2025).
 #' @param comm A community matrix where species are columns and samples are rows.
+#' @param verbose Logical; if \code{TRUE}, displays progress messages.
+#' @param plot Logical; if \code{TRUE}, displays the plot of endemic vs. other species proportions.
 #' @importFrom dplyr group_by summarise mutate
 #' @importFrom ggplot2 ggplot aes geom_col labs theme_minimal theme element_text scale_y_continuous scale_fill_manual
 #' @importFrom stringr str_wrap
 #' @importFrom stats reorder
 #' @importFrom scales percent
+#' @return Invisibly returns a list with two elements:
+#'   \item{table}{A data frame containing endemic species detected, with columns species, abundance, and percentage.}
+#'   \item{plot}{A ggplot2 object showing the proportion of endemic vs. other species.}
+#' @examples
+#' # Create a small example community matrix
+#' species_list <- c(
+#'   "Camponotus fallatus", "Solenopsis saevissima", "Hypoponera leninei",
+#'   "Pachycondyla striata", "Pheidole megacephala"
+#' )
+#' set.seed(123)
+#' comm_data <- matrix(
+#'   rpois(length(species_list) * 3, lambda = 2),
+#'   nrow = 3,
+#'   ncol = length(species_list),
+#'   dimnames = list(paste0("sample", 1:3), species_list)
+#' )
+#' result <- check_endemic_atlantic_ants(comm_data, verbose = FALSE, plot = FALSE)
+#' head(result$table)
 #' @export
-check_endemic_atlantic_ants <- function(comm) {
+check_endemic_atlantic_ants <- function(comm, verbose = TRUE, plot = TRUE) {
 
-  # --- WARNING ---
-  cat("\n**********************************************************************************\n")
-  cat("ATTENTION: This function identifies endemic species of the BRAZILIAN ATLANTIC FOREST.\n")
-  cat("If your data collection did not occur within this biome, this analysis may not\n")
-  cat("be appropriate for your study.\n")
-  cat("**********************************************************************************\n\n")
+  if (verbose) {
+    message("\n**********************************************************************************")
+    message("ATTENTION: This function identifies endemic species of the BRAZILIAN ATLANTIC FOREST.")
+    message("If your data collection did not occur within this biome, this analysis may not")
+    message("be appropriate for your study.")
+    message("**********************************************************************************\n")
+  }
 
-  message("Step 1: Preparing community data...")
+  if (verbose) message("Step 1: Preparing community data...")
 
   # Official list of endemic species (Silva et al., 2025)
   endemic_list <- c(
@@ -57,9 +78,9 @@ check_endemic_atlantic_ants <- function(comm) {
   df$percentage <- (df$abundance / total_abs) * 100
   df$status <- ifelse(df$species %in% endemic_list, "Endemic (AF)", "Other/Not Listed")
 
-  message("Step 2: Generating results...")
+  if (verbose) message("Step 2: Generating results...")
 
-  # Summary for plot (Avoiding pipe syntax for stability)
+  # Summary for plot
   res_plot <- dplyr::group_by(df, status)
   res_plot <- dplyr::summarise(res_plot, total = sum(abundance), .groups = "drop")
   res_plot <- dplyr::mutate(res_plot, prop = total / sum(total))
@@ -82,30 +103,27 @@ check_endemic_atlantic_ants <- function(comm) {
   endemicas_detectadas <- df[df$status == "Endemic (AF)", ]
   rownames(endemicas_detectadas) <- NULL
 
-  cat("\n********************************************************************************\n")
-  if(nrow(endemicas_detectadas) > 0) {
-    cat("ENDEMIC SPECIES DETECTED (ATLANTIC FOREST):\n")
-    print(endemicas_detectadas[, c("species", "abundance", "percentage")])
-  } else {
-    cat("No species from the Atlantic Forest endemic list were detected in this community.\n")
+  if (verbose) {
+    message("\n********************************************************************************")
+    if (nrow(endemicas_detectadas) > 0) {
+      message("ENDEMIC SPECIES DETECTED (ATLANTIC FOREST):")
+      print(endemicas_detectadas[, c("species", "abundance", "percentage")])
+    } else {
+      message("No species from the Atlantic Forest endemic list were detected in this community.")
+    }
+
+    # --- REFERENCE  ---
+    message("\nDATA SOURCE AND REFERENCE:")
+    message("The endemic species list is sourced from:")
+    message("Silva, N. S., Goncalves, D. C. de O., Wazema, C. T., Barbosa, D. A., Prado, L. P. do,")
+    message("Andrade-Silva, J., Fernandes, T. T., Silva, R. R., & Morini, M. S. de C. (2025).")
+    message("'Endemism and vulnerability of ants in the phytophysiognomies of the Brazilian")
+    message("Atlantic Forest'. In: Brazilian Myrmecology: Exploring the World\u2019s Richest Ant Fauna")
+    message("(Chapter 16). Editora Cientifica Digital. DOI: 10.37885/250920259.")
+    message("********************************************************************************")
   }
 
-  # --- REFERENCE  ---
-  cat("\nDATA SOURCE AND REFERENCE:\n")
-  cat("The endemic species list is sourced from:\n")
-  cat("Silva, N. S., Goncalves, D. C. de O., Wazema, C. T., Barbosa, D. A., Prado, L. P. do,\n")
-  cat("Andrade-Silva, J., Fernandes, T. T., Silva, R. R., & Morini, M. S. de C. (2025).\n")
-  cat("'Endemism and vulnerability of ants in the phytophysiognomies of the Brazilian\n")
-  cat("Atlantic Forest'. In: Brazilian Myrmecology: Exploring the World\u2019s Richest Ant Fauna\n")
-  cat("(Chapter 16). Editora Cientifica Digital. DOI: 10.37885/250920259.\n")
-  cat("********************************************************************************\n")
+  if (plot) print(p1)
 
-
-  print(p1)
-
-
-  return(invisible(list(table = endemicas_detectadas, plot = p1)))
+  invisible(list(table = endemicas_detectadas, plot = p1))
 }
-
-
-
