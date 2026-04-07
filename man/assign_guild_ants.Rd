@@ -4,7 +4,13 @@
 \alias{assign_guild_ants}
 \title{Assign Functional Guilds for Ants}
 \usage{
-assign_guild_ants(comm, verbose = TRUE, plot = TRUE)
+assign_guild_ants(
+  comm,
+  verbose = TRUE,
+  plot = TRUE,
+  validate = TRUE,
+  delay = 0.5
+)
 }
 \arguments{
 \item{comm}{A community matrix where species are columns and samples are rows.}

@@ -26,7 +26,12 @@
 #' result <- check_exotic_ants(comm_data, verbose = FALSE, plot = FALSE)
 #' head(result$table)
 #' @export
-check_exotic_ants <- function(comm, verbose = TRUE, plot = TRUE) {
+  check_exotic_ants <- function(comm, verbose = TRUE, plot = TRUE, validate = TRUE, delay = 0.5) {
+
+    # --- Optional validation of species names using GBIF ---
+    if (isTRUE(validate)) {
+      comm <- validate_species_names(comm, verbose = verbose, delay = delay)
+    }
 
   if (verbose) message("Step 1: Preparing community data...")
 

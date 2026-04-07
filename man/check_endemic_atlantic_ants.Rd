@@ -4,7 +4,13 @@
 \alias{check_endemic_atlantic_ants}
 \title{Identify Endemic Ant Species (Atlantic Forest)}
 \usage{
-check_endemic_atlantic_ants(comm, verbose = TRUE, plot = TRUE)
+check_endemic_atlantic_ants(
+  comm,
+  verbose = TRUE,
+  plot = TRUE,
+  validate = TRUE,
+  delay = 0.5
+)
 }
 \arguments{
 \item{comm}{A community matrix where species are columns and samples are rows.}

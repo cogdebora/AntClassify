@@ -24,6 +24,9 @@ antclassify <- function(comm) {
 
   results <- list()
 
+  comm_corrected <- validate_species_names(comm_matrix, verbose = TRUE)
+  result <- assign_guild_ants(comm_corrected)
+
   message("\n>>> Running guild classification")
   results$guilds <- assign_guild_ants(comm)
 

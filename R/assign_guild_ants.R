@@ -34,7 +34,11 @@
 #' head(result$table)
 #' }
 #' @export
-assign_guild_ants <- function(comm, verbose = TRUE, plot = TRUE) {
+assign_guild_ants <- function(comm, verbose = TRUE, plot = TRUE, validate = TRUE, delay = 0.5) {
+  # Optional validation of species names using GBIF
+  if (isTRUE(validate)) {
+    comm <- validate_species_names(comm, verbose = verbose, delay = delay)
+  }
 
   if (verbose) message("Step 1: Preparing community data...")
   dados_numericos <- as.data.frame(comm)

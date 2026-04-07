@@ -27,7 +27,11 @@
 #' result <- check_endemic_atlantic_ants(comm_data, verbose = FALSE, plot = FALSE)
 #' head(result$table)
 #' @export
-check_endemic_atlantic_ants <- function(comm, verbose = TRUE, plot = TRUE) {
+check_endemic_atlantic_ants <- function(comm, verbose = TRUE, plot = TRUE, validate = TRUE, delay = 0.5) {
+
+  if (isTRUE(validate)) {
+    comm <- validate_species_names(comm, verbose = verbose, delay = delay)
+  }
 
   if (verbose) {
     message("\n**********************************************************************************")

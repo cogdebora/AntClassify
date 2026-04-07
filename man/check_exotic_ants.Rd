@@ -4,7 +4,13 @@
 \alias{check_exotic_ants}
 \title{Identify Exotic Ant Species (Brazil)}
 \usage{
-check_exotic_ants(comm, verbose = TRUE, plot = TRUE)
+check_exotic_ants(
+  comm,
+  verbose = TRUE,
+  plot = TRUE,
+  validate = TRUE,
+  delay = 0.5
+)
 }
 \arguments{
 \item{comm}{A community matrix where species are columns and samples are rows.}

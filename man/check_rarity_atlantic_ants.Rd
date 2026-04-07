@@ -4,7 +4,13 @@
 \alias{check_rarity_atlantic_ants}
 \title{Identify Ant Rarity Forms (Atlantic Forest)}
 \usage{
-check_rarity_atlantic_ants(comm, verbose = TRUE, plot = TRUE)
+check_rarity_atlantic_ants(
+  comm,
+  verbose = TRUE,
+  plot = TRUE,
+  validate = TRUE,
+  delay = 0.5
+)
 }
 \arguments{
 \item{comm}{A community matrix where species are columns and samples are rows.}
