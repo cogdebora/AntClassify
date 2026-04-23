@@ -2,40 +2,31 @@
 #' @description Checks a community matrix for known exotic ant species in Brazil sourced from Vieira (2025).
 #' @param comm A community matrix where species are columns and samples are rows.
 #' @param verbose Logical; if \code{TRUE}, displays progress messages.
-#' @param plot Logical; if \code{TRUE}, displays the plot of exotic vs. native proportions.
+#' @param plot Logical; if \code{TRUE}, displays a plot (type controlled by \code{plot_type}).
+#' @param plot_type Character; type of plot to display. \code{"status"} (default) shows a bar plot comparing
+#'   exotic vs. native abundance proportions. \code{"species"} shows a bar plot of individual exotic species
+#'   abundances as a proportion of the total community.
+#' @param validate Logical; if \code{TRUE}, validates species names using GBIF before analysis.
+#' @param delay Numeric; seconds to wait between GBIF API calls when \code{validate = TRUE}.
 #' @importFrom dplyr group_by summarise mutate
-#' @importFrom ggplot2 ggplot aes geom_col scale_y_continuous scale_fill_manual labs theme_minimal theme element_text
-#' @importFrom scales percent
+#' @importFrom ggplot2 ggplot aes geom_col scale_y_continuous scale_fill_manual labs theme_classic theme element_text element_blank element_line
+#' @importFrom scales percent_format
 #' @importFrom stats reorder
 #' @return Invisibly returns a list with two elements:
 #'   \item{table}{A data frame containing exotic species detected, with columns species, abundance, and percentage.}
-#'   \item{plot}{A ggplot2 object showing the proportion of exotic vs. native species.}
-#' @examples
-#' # Create a small example community matrix
-#' species_list <- c(
-#'   "Pachycondyla striata", "Pheidole megacephala", "Solenopsis saevissima",
-#'   "Paratrechina longicornis", "Wasmannia auropunctata"
-#' )
-#' set.seed(123)
-#' comm_data <- matrix(
-#'   rpois(length(species_list) * 3, lambda = 2),
-#'   nrow = 3,
-#'   ncol = length(species_list),
-#'   dimnames = list(paste0("sample", 1:3), species_list)
-#' )
-#' result <- check_exotic_ants(comm_data, verbose = FALSE, plot = FALSE)
-#' head(result$table)
+#'   \item{plot}{A ggplot2 object.}
 #' @export
-  check_exotic_ants <- function(comm, verbose = TRUE, plot = TRUE, validate = TRUE, delay = 0.5) {
+check_exotic_ants <- function(comm, verbose = TRUE, plot = TRUE, plot_type = c("status", "species"),
+                              validate = TRUE, delay = 0.5) {
 
-    # --- Optional validation of species names using GBIF ---
-    if (isTRUE(validate)) {
-      comm <- validate_species_names(comm, verbose = verbose, delay = delay)
-    }
+  plot_type <- match.arg(plot_type)
+
+  if (isTRUE(validate)) {
+    comm <- validate_species_names(comm, verbose = verbose, delay = delay)
+  }
 
   if (verbose) message("Step 1: Preparing community data...")
 
-  # Official list of exotic species from Vieira (2025)
   exotic_list <- c(
     "Tapinoma melanocephalum", "Technomyrmex vitiensis", "Paratrechina longicornis",
     "Cardiocondyla emeryi", "Cardiocondyla minutior", "Cardiocondyla obscurior",
@@ -46,14 +37,12 @@
     "Leptogenys maxillosa"
   )
 
-  # Data processing
   dados_numericos <- as.data.frame(comm)
   nomes_limpos <- trimws(gsub("_", " ", gsub("\\.", " ", colnames(dados_numericos))))
   colnames(dados_numericos) <- nomes_limpos
 
   total_abs <- sum(colSums(dados_numericos, na.rm = TRUE))
 
-  # Creating the dataframe
   df <- data.frame(
     species = colnames(dados_numericos),
     abundance = as.numeric(colSums(dados_numericos, na.rm = TRUE)),
@@ -65,26 +54,70 @@
 
   if (verbose) message("Step 2: Generating results...")
 
-  # Summary for plot
   res_plot <- dplyr::group_by(df, origin)
   res_plot <- dplyr::summarise(res_plot, total = sum(abundance), .groups = "drop")
   res_plot <- dplyr::mutate(res_plot, prop = total / sum(total))
 
-  p1 <- ggplot2::ggplot(res_plot, ggplot2::aes(x = stats::reorder(origin, prop), y = prop, fill = origin)) +
-    ggplot2::geom_col() +
-    ggplot2::scale_y_continuous(labels = scales::percent) +
-    ggplot2::scale_fill_manual(values = c("Exotic" = "#d95f02", "Native/Not Listed" = "#1b9e77")) +
-    ggplot2::labs(
-      title = "Proportion of Exotic vs. Native Species",
-      subtitle = "Based on total abundance in the community",
-      x = "Status",
-      y = "Proportion"
-    ) +
-    ggplot2::theme_minimal() +
-    ggplot2::theme(legend.position = "none")
-
   exoticas_detectadas <- df[df$origin == "Exotic", ]
   rownames(exoticas_detectadas) <- NULL
+
+  # --- Generate plot based on plot_type (ALWAYS create) ---
+  p <- NULL
+
+  if (plot_type == "status") {
+    p <- ggplot2::ggplot(res_plot, ggplot2::aes(x = stats::reorder(origin, prop), y = prop, fill = origin)) +
+      ggplot2::geom_col(color = "black", width = 0.7) +
+      ggplot2::scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+      ggplot2::scale_fill_manual(values = c("Exotic" = "#d95f02", "Native/Not Listed" = "#1b9e77")) +
+      ggplot2::labs(
+        title = "Proportion of Exotic vs. Native Species",
+        x = "Status",
+        y = "Proportion"
+      ) +
+      ggplot2::theme_classic() +
+      ggplot2::theme(
+        legend.position = "none",
+        axis.text.x = ggplot2::element_text(size = 10),
+        axis.text.y = ggplot2::element_text(size = 9),
+        axis.title = ggplot2::element_text(size = 11),
+        plot.title = ggplot2::element_text(hjust = 0.5, size = 12, face = "bold"),
+        panel.grid = ggplot2::element_blank(),
+        axis.line = ggplot2::element_line(color = "black")
+      )
+  } else { # plot_type == "species"
+    if (nrow(exoticas_detectadas) > 0) {
+      exotic_plot_data <- exoticas_detectadas
+      exotic_plot_data$prop_community <- exotic_plot_data$abundance / total_abs
+
+      p <- ggplot2::ggplot(
+        exotic_plot_data,
+        ggplot2::aes(x = stats::reorder(species, -prop_community), y = prop_community)
+      ) +
+        ggplot2::geom_col(fill = "#d95f02", color = "black", width = 0.7) +
+        ggplot2::scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+        ggplot2::labs(
+          title = "Exotic Species Detected",
+          x = NULL,
+          y = "Proportion of Total Community"
+        ) +
+        ggplot2::theme_classic() +
+        ggplot2::theme(
+          axis.text.x = ggplot2::element_text(angle = 45, hjust = 1, face = "italic", size = 9),
+          axis.text.y = ggplot2::element_text(size = 9),
+          axis.title = ggplot2::element_text(size = 11),
+          plot.title = ggplot2::element_text(hjust = 0.5, size = 12, face = "bold"),
+          panel.grid = ggplot2::element_blank(),
+          axis.line = ggplot2::element_line(color = "black"),
+          legend.position = "none"
+        )
+    } else {
+      p <- ggplot2::ggplot() +
+        ggplot2::annotate("text", x = 1, y = 1, label = "No exotic species detected") +
+        ggplot2::theme_void()
+    }
+  }
+
+  if (plot) print(p)
 
   if (verbose) {
     message("\n********************************************************************************")
@@ -94,8 +127,6 @@
     } else {
       message("No exotic species from the target list were detected in this community.")
     }
-
-    # --- REFERENCE ---
     message("\nDATA SOURCE AND REFERENCE:")
     message("The exotic species list used in this function is sourced from:")
     message("VIEIRA, Vitoria Brunetta. 'Quem s\u00e3o e onde est\u00e3o as formigas ex\u00f3ticas do Brasil?'")
@@ -104,7 +135,5 @@
     message("********************************************************************************")
   }
 
-  if (plot) print(p1)
-
-  invisible(list(table = exoticas_detectadas, plot = p1))
+  invisible(list(table = exoticas_detectadas, plot = p))
 }

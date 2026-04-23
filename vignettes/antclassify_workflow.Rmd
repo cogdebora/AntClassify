@@ -1,12 +1,12 @@
 ---
 
-title: "AntClassify"
+itle: "AntClassify"
 output: rmarkdown::html_vignette
 vignette: >
-%\VignetteIndexEntry{antclassify_workflow}
-%\VignetteEngine{knitr::rmarkdown}
-%\VignetteEncoding{UTF-8}
--------------------------
+  %\VignetteIndexEntry{antclassify_workflow}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
@@ -21,7 +21,7 @@ library(AntClassify)
 
 ## Introduction
 
-The **AntClassify** package provides an integrated ecological pipeline to classify ant communities into functional guilds, identify exotic species, detect endemic and rare species of the Atlantic Forest, and quantify key ecological patterns.
+The AntClassify package provides an integrated ecological pipeline to classify ant communities into functional guilds, identify exotic species, detect endemic and rare species of the Atlantic Forest, and quantify key ecological patterns.
 
 This tool was developed to facilitate ecological analyses, standardize functional classification, and improve reproducibility in ant community studies. By integrating multiple ecological databases into a single workflow, AntClassify allows researchers to efficiently assess community structure, biological invasions, endemism, and rarity patterns.
 
@@ -78,7 +78,7 @@ dados
 ## Running the pipeline
 
 ```{r}
-resultado <- antclassify(dados)
+resultado <- antclassify(dados, validate = FALSE, plot = FALSE)
 ```
 
 ## Accessing results
@@ -99,52 +99,71 @@ Although `antclassify()` runs the full pipeline, users can also apply each funct
 ### Functional guild classification
 
 ```{r}
-guilds <- assign_guild_ants(dados)
+guilds <- assign_guild_ants(dados, validate = FALSE, plot = FALSE)
 
 head(guilds$table)
-guilds$plot
 ```
 
 ### Exotic species detection
 
 ```{r}
-exotics <- check_exotic_ants(dados)
+exotics <- check_exotic_ants(dados, validate = FALSE, plot = FALSE)
 exotics
 ```
 
 ### Endemic species (Atlantic Forest)
 
 ```{r}
-endemics <- check_endemic_atlantic_ants(dados)
+endemics <- check_endemic_atlantic_ants(dados, validate = FALSE, plot = FALSE)
 endemics
 ```
 
 ### Rarity classification
 
 ```{r}
-rarity <- check_rarity_atlantic_ants(dados)
+rarity <- check_rarity_atlantic_ants(dados, validate = FALSE, plot = FALSE)
 rarity
+```
+
+##Multi‑site analysis with antclassify_community
+
+When the study involves several sampling units, the function antclassify_community() applies the full classification pipeline to each row of a community matrix and returns aggregated site‑by‑guild information. This avoids manual loops and ensures consistent classification across all sites.
+
+The package includes a small built‑in dataset, ant_community, that can be used to test this function.
+
+```{r}
+data(ant_community)
+
+# Run the pipeline on the built‑in dataset
+res_com <- antclassify_community(ant_community, guild_col = "antclassify_guild",
+                                 validate = FALSE)
+
+# Abundance matrix (sites × guilds)
+res_com$guild_abundance
+
+# Guild richness per site
+res_com$guild_richness
 ```
 
 ## Input data format
 
 The package expects a community matrix where:
 
-* Rows represent sampling units (or a single community)
-* Columns represent species
-* Values represent abundance (or presence/absence)
+Rows represent sampling units (or a single community)
 
-Species names must be provided as column names.
+Columns represent species
+
+Values represent abundance (or presence/absence)
+
+Species names must be provided as column names..
 
 ### Example structure
 
-```{r}
-dados_exemplo <- data.frame(
-  "Atta sexdens" = 10,
-  "Camponotus atriceps" = 5
-)
+The built‑in dataset ant_community demonstrates the expected format:
 
-dados_exemplo
+```{r}
+data(ant_community)
+ant_community
 ```
 
 ## Importing data from external files
@@ -181,6 +200,6 @@ This step guarantees compatibility with the internal species name standardizatio
 
 ## Final considerations
 
-The **AntClassify** package provides a flexible workflow that can be used either as a fully automated pipeline or through modular functions, allowing users to adapt analyses to different ecological questions.
+The AntClassify package provides a flexible workflow that can be used either as a fully automated pipeline or through modular functions, allowing users to adapt analyses to different ecological questions.
 
 By integrating functional classification, invasion biology, endemism, and rarity into a single framework, the package enhances reproducibility and facilitates ecological interpretation of ant communities.

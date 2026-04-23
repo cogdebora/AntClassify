@@ -2,33 +2,26 @@
 #' @description Checks a community matrix for ant rarity forms in the Brazilian Atlantic Forest based on Silva et al. (2024).
 #' @param comm A community matrix where species are columns and samples are rows.
 #' @param verbose Logical; if \code{TRUE}, displays progress messages.
-#' @param plot Logical; if \code{TRUE}, displays the plot of rarity forms distribution.
+#' @param plot Logical; if \code{TRUE}, displays a plot (type controlled by \code{plot_type}).
+#' @param plot_type Character; type of plot to display. \code{"status"} (default) shows a bar plot of rarity form
+#'   abundance proportions. \code{"species"} shows a bar plot of individual rare species abundances as a proportion
+#'   of the total community, colored by rarity form.
+#' @param validate Logical; if \code{TRUE}, validates species names using GBIF before analysis.
+#' @param delay Numeric; seconds to wait between GBIF API calls when \code{validate = TRUE}.
 #' @importFrom dplyr group_by summarise mutate
-#' @importFrom ggplot2 ggplot aes geom_col labs theme_minimal theme scale_y_continuous
+#' @importFrom ggplot2 ggplot aes geom_col labs theme_classic theme element_text element_blank element_line scale_y_continuous
+#' @importFrom scales percent_format
 #' @importFrom stats reorder
-#' @importFrom scales percent
 #' @return Invisibly returns a list with two elements:
 #'   \item{table}{A data frame containing rare species detected, with columns species, rarity_form, abundance, and percentage.}
-#'   \item{plot}{A ggplot2 object showing the distribution of rarity forms.}
-#' @examples
-#' # Create a small example community matrix
-#' species_list <- c(
-#'   "Ectatomma brunneum", "Pheidole aberrans", "Camponotus crassus",
-#'   "Solenopsis saevissima", "Pachycondyla striata"
-#' )
-#' set.seed(123)
-#' comm_data <- matrix(
-#'   rpois(length(species_list) * 3, lambda = 2),
-#'   nrow = 3,
-#'   ncol = length(species_list),
-#'   dimnames = list(paste0("sample", 1:3), species_list)
-#' )
-#' result <- check_rarity_atlantic_ants(comm_data, verbose = FALSE, plot = FALSE)
-#' head(result$table)
+#'   \item{plot}{A ggplot2 object.}
 #' @export
-check_rarity_atlantic_ants <- function(comm, verbose = TRUE, plot = TRUE, validate = TRUE, delay = 0.5) {
+check_rarity_atlantic_ants <- function(comm, verbose = TRUE, plot = TRUE,
+                                       plot_type = c("status", "species"),
+                                       validate = TRUE, delay = 0.5) {
 
-  # --- Optional validation of species names using GBIF ---
+  plot_type <- match.arg(plot_type)
+
   if (isTRUE(validate)) {
     comm <- validate_species_names(comm, verbose = verbose, delay = delay)
   }
@@ -44,7 +37,6 @@ check_rarity_atlantic_ants <- function(comm, verbose = TRUE, plot = TRUE, valida
 
   if (verbose) message("Step 1: Preparing community data and rarity database...")
 
-  # (Silva et al. 2024)
   rarity_db <- data.frame(
     species = c(
       "Acanthoponera mucronata", "Acropyga guianensis", "Alfaria minuta", "Brachymyrmex coactus",
@@ -85,7 +77,6 @@ check_rarity_atlantic_ants <- function(comm, verbose = TRUE, plot = TRUE, valida
     stringsAsFactors = FALSE
   )
 
-  # Data processing
   dados_numericos <- as.data.frame(comm)
   nomes_limpos <- trimws(gsub("_", " ", gsub("\\.", " ", colnames(dados_numericos))))
   colnames(dados_numericos) <- nomes_limpos
@@ -94,14 +85,12 @@ check_rarity_atlantic_ants <- function(comm, verbose = TRUE, plot = TRUE, valida
 
   total_abs <- sum(colSums(dados_numericos, na.rm = TRUE))
 
-  # Summary table
   df <- data.frame(
     species = colnames(dados_numericos),
     abundance = as.numeric(colSums(dados_numericos, na.rm = TRUE)),
     stringsAsFactors = FALSE
   )
 
-  # Merge with rarity database
   df <- merge(df, rarity_db, by = "species", all.x = TRUE)
   df$rarity_form[is.na(df$rarity_form)] <- "Common"
 
@@ -109,26 +98,70 @@ check_rarity_atlantic_ants <- function(comm, verbose = TRUE, plot = TRUE, valida
 
   if (verbose) message("Step 2: Generating results...")
 
-  # Plotting
   res_plot <- dplyr::group_by(df, rarity_form)
   res_plot <- dplyr::summarise(res_plot, total = sum(abundance), .groups = "drop")
   res_plot <- dplyr::mutate(res_plot, prop = total / sum(total))
 
-  p1 <- ggplot2::ggplot(res_plot, ggplot2::aes(x = stats::reorder(rarity_form, prop), y = prop, fill = rarity_form)) +
-    ggplot2::geom_col() +
-    ggplot2::scale_y_continuous(labels = scales::percent) +
-    ggplot2::labs(
-      title = "Ant Rarity Forms Distribution",
-      subtitle = "Based on total abundance in the community",
-      x = "Rarity Classification",
-      y = "Proportion (%)"
-    ) +
-    ggplot2::theme_minimal() +
-    ggplot2::theme(legend.position = "bottom")
-
-  # Filter for return
   raras_detectadas <- df[df$rarity_form != "Common", ]
   rownames(raras_detectadas) <- NULL
+
+  # --- Generate plot based on plot_type (ALWAYS create) ---
+  p <- NULL
+
+  if (plot_type == "status") {
+    p <- ggplot2::ggplot(res_plot, ggplot2::aes(x = stats::reorder(rarity_form, prop), y = prop, fill = rarity_form)) +
+      ggplot2::geom_col(color = "black", width = 0.7) +
+      ggplot2::scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+      ggplot2::labs(
+        title = "Ant Rarity Forms Distribution",
+        x = "Rarity Classification",
+        y = "Proportion"
+      ) +
+      ggplot2::theme_classic() +
+      ggplot2::theme(
+        legend.position = "bottom",
+        axis.text.x = ggplot2::element_text(size = 10),
+        axis.text.y = ggplot2::element_text(size = 9),
+        axis.title = ggplot2::element_text(size = 11),
+        plot.title = ggplot2::element_text(hjust = 0.5, size = 12, face = "bold"),
+        panel.grid = ggplot2::element_blank(),
+        axis.line = ggplot2::element_line(color = "black")
+      )
+  } else { # plot_type == "species"
+    if (nrow(raras_detectadas) > 0) {
+      rare_plot_data <- raras_detectadas
+      rare_plot_data$prop_community <- rare_plot_data$abundance / total_abs
+
+      p <- ggplot2::ggplot(
+        rare_plot_data,
+        ggplot2::aes(x = stats::reorder(species, -prop_community), y = prop_community, fill = rarity_form)
+      ) +
+        ggplot2::geom_col(color = "black", width = 0.7) +
+        ggplot2::scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+        ggplot2::labs(
+          title = "Rare Species Abundance by Rarity Form",
+          x = NULL,
+          y = "Proportion of Total Community",
+          fill = "Rarity Form"
+        ) +
+        ggplot2::theme_classic() +
+        ggplot2::theme(
+          axis.text.x = ggplot2::element_text(angle = 45, hjust = 1, face = "italic", size = 9),
+          axis.text.y = ggplot2::element_text(size = 9),
+          axis.title = ggplot2::element_text(size = 11),
+          plot.title = ggplot2::element_text(hjust = 0.5, size = 12, face = "bold"),
+          panel.grid = ggplot2::element_blank(),
+          axis.line = ggplot2::element_line(color = "black"),
+          legend.position = "right"
+        )
+    } else {
+      p <- ggplot2::ggplot() +
+        ggplot2::annotate("text", x = 1, y = 1, label = "No rare species detected") +
+        ggplot2::theme_void()
+    }
+  }
+
+  if (plot) print(p)
 
   if (verbose) {
     message("\n********************************************************************************")
@@ -138,8 +171,6 @@ check_rarity_atlantic_ants <- function(comm, verbose = TRUE, plot = TRUE, valida
     } else {
       message("No rare species from the target list were detected.")
     }
-
-    # --- REFERENCE ---
     message("\nDATA SOURCE AND REFERENCE:")
     message("Silva, N. S., Maciel, E. A., Prado, L. P., Silva, O. G., Barbosa, D. A.,")
     message("Andrade-Silva, J., ... & Morini, M. S. (2024).")
@@ -148,7 +179,5 @@ check_rarity_atlantic_ants <- function(comm, verbose = TRUE, plot = TRUE, valida
     message("********************************************************************************")
   }
 
-  if (plot) print(p1)
-
-  invisible(list(table = raras_detectadas, plot = p1))
+  invisible(list(table = raras_detectadas, plot = p))
 }

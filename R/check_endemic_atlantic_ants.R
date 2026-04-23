@@ -2,32 +2,25 @@
 #' @description Checks a community matrix for ant species endemic to the Brazilian Atlantic Forest based on Silva et al. (2025).
 #' @param comm A community matrix where species are columns and samples are rows.
 #' @param verbose Logical; if \code{TRUE}, displays progress messages.
-#' @param plot Logical; if \code{TRUE}, displays the plot of endemic vs. other species proportions.
+#' @param plot Logical; if \code{TRUE}, displays a plot (type controlled by \code{plot_type}).
+#' @param plot_type Character; type of plot to display. \code{"status"} (default) shows a bar plot comparing
+#'   endemic vs. other species abundance proportions. \code{"species"} shows a bar plot of individual endemic
+#'   species abundances as a proportion of the total community.
+#' @param validate Logical; if \code{TRUE}, validates species names using GBIF before analysis.
+#' @param delay Numeric; seconds to wait between GBIF API calls when \code{validate = TRUE}.
 #' @importFrom dplyr group_by summarise mutate
-#' @importFrom ggplot2 ggplot aes geom_col labs theme_minimal theme element_text scale_y_continuous scale_fill_manual
-#' @importFrom stringr str_wrap
+#' @importFrom ggplot2 ggplot aes geom_col scale_y_continuous scale_fill_manual labs theme_classic theme element_text element_blank element_line
+#' @importFrom scales percent_format
 #' @importFrom stats reorder
-#' @importFrom scales percent
 #' @return Invisibly returns a list with two elements:
 #'   \item{table}{A data frame containing endemic species detected, with columns species, abundance, and percentage.}
-#'   \item{plot}{A ggplot2 object showing the proportion of endemic vs. other species.}
-#' @examples
-#' # Create a small example community matrix
-#' species_list <- c(
-#'   "Camponotus fallatus", "Solenopsis saevissima", "Hypoponera leninei",
-#'   "Pachycondyla striata", "Pheidole megacephala"
-#' )
-#' set.seed(123)
-#' comm_data <- matrix(
-#'   rpois(length(species_list) * 3, lambda = 2),
-#'   nrow = 3,
-#'   ncol = length(species_list),
-#'   dimnames = list(paste0("sample", 1:3), species_list)
-#' )
-#' result <- check_endemic_atlantic_ants(comm_data, verbose = FALSE, plot = FALSE)
-#' head(result$table)
+#'   \item{plot}{A ggplot2 object.}
 #' @export
-check_endemic_atlantic_ants <- function(comm, verbose = TRUE, plot = TRUE, validate = TRUE, delay = 0.5) {
+check_endemic_atlantic_ants <- function(comm, verbose = TRUE, plot = TRUE,
+                                        plot_type = c("status", "species"),
+                                        validate = TRUE, delay = 0.5) {
+
+  plot_type <- match.arg(plot_type)
 
   if (isTRUE(validate)) {
     comm <- validate_species_names(comm, verbose = verbose, delay = delay)
@@ -43,7 +36,6 @@ check_endemic_atlantic_ants <- function(comm, verbose = TRUE, plot = TRUE, valid
 
   if (verbose) message("Step 1: Preparing community data...")
 
-  # Official list of endemic species (Silva et al., 2025)
   endemic_list <- c(
     "Acanthostichus flexuosus", "Apterostigma serratum", "Brachymyrmex delabiei",
     "Brachymyrmex feitosai", "Camponotus fallatus", "Camponotus hermanni",
@@ -64,48 +56,87 @@ check_endemic_atlantic_ants <- function(comm, verbose = TRUE, plot = TRUE, valid
     "Typhlomyrmex lavra"
   )
 
-  # Data processing: cleanup names and handle matrix dimensions
   dados_numericos <- as.data.frame(comm)
   nomes_limpos <- trimws(gsub("_", " ", gsub("\\.", " ", colnames(dados_numericos))))
   colnames(dados_numericos) <- nomes_limpos
 
   total_abs <- sum(colSums(dados_numericos, na.rm = TRUE))
 
-  # Create work dataframe
   df <- data.frame(
     species = colnames(dados_numericos),
     abundance = as.numeric(colSums(dados_numericos, na.rm = TRUE)),
     stringsAsFactors = FALSE
   )
 
-  # Calculations
   df$percentage <- (df$abundance / total_abs) * 100
   df$status <- ifelse(df$species %in% endemic_list, "Endemic (AF)", "Other/Not Listed")
 
   if (verbose) message("Step 2: Generating results...")
 
-  # Summary for plot
   res_plot <- dplyr::group_by(df, status)
   res_plot <- dplyr::summarise(res_plot, total = sum(abundance), .groups = "drop")
   res_plot <- dplyr::mutate(res_plot, prop = total / sum(total))
 
-  # Plotting with cool blue tones
-  p1 <- ggplot2::ggplot(res_plot, ggplot2::aes(x = stats::reorder(status, prop), y = prop, fill = status)) +
-    ggplot2::geom_col() +
-    ggplot2::scale_y_continuous(labels = scales::percent) +
-    ggplot2::scale_fill_manual(values = c("Endemic (AF)" = "#2c7bb6", "Other/Not Listed" = "#abd9e9")) +
-    ggplot2::labs(
-      title = "Proportion of Atlantic Forest Endemic Species",
-      subtitle = "Based on total abundance in the community",
-      x = "Status",
-      y = "Proportion (%)"
-    ) +
-    ggplot2::theme_minimal() +
-    ggplot2::theme(legend.position = "none", axis.text = ggplot2::element_text(size = 10))
-
-  # Filtering for return
   endemicas_detectadas <- df[df$status == "Endemic (AF)", ]
   rownames(endemicas_detectadas) <- NULL
+
+  # --- Generate plot based on plot_type (ALWAYS create) ---
+  p <- NULL
+
+  if (plot_type == "status") {
+    p <- ggplot2::ggplot(res_plot, ggplot2::aes(x = stats::reorder(status, prop), y = prop, fill = status)) +
+      ggplot2::geom_col(color = "black", width = 0.7) +
+      ggplot2::scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+      ggplot2::scale_fill_manual(values = c("Endemic (AF)" = "#2c7bb6", "Other/Not Listed" = "#abd9e9")) +
+      ggplot2::labs(
+        title = "Proportion of Atlantic Forest Endemic Species",
+        x = "Status",
+        y = "Proportion"
+      ) +
+      ggplot2::theme_classic() +
+      ggplot2::theme(
+        legend.position = "none",
+        axis.text.x = ggplot2::element_text(size = 10),
+        axis.text.y = ggplot2::element_text(size = 9),
+        axis.title = ggplot2::element_text(size = 11),
+        plot.title = ggplot2::element_text(hjust = 0.5, size = 12, face = "bold"),
+        panel.grid = ggplot2::element_blank(),
+        axis.line = ggplot2::element_line(color = "black")
+      )
+  } else { # plot_type == "species"
+    if (nrow(endemicas_detectadas) > 0) {
+      endemic_plot_data <- endemicas_detectadas
+      endemic_plot_data$prop_community <- endemic_plot_data$abundance / total_abs
+
+      p <- ggplot2::ggplot(
+        endemic_plot_data,
+        ggplot2::aes(x = stats::reorder(species, -prop_community), y = prop_community)
+      ) +
+        ggplot2::geom_col(fill = "#2c7bb6", color = "black", width = 0.7) +
+        ggplot2::scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+        ggplot2::labs(
+          title = "Endemic Species of the Atlantic Forest",
+          x = NULL,
+          y = "Proportion of Total Community"
+        ) +
+        ggplot2::theme_classic() +
+        ggplot2::theme(
+          axis.text.x = ggplot2::element_text(angle = 45, hjust = 1, face = "italic", size = 9),
+          axis.text.y = ggplot2::element_text(size = 9),
+          axis.title = ggplot2::element_text(size = 11),
+          plot.title = ggplot2::element_text(hjust = 0.5, size = 12, face = "bold"),
+          panel.grid = ggplot2::element_blank(),
+          axis.line = ggplot2::element_line(color = "black"),
+          legend.position = "none"
+        )
+    } else {
+      p <- ggplot2::ggplot() +
+        ggplot2::annotate("text", x = 1, y = 1, label = "No endemic species detected") +
+        ggplot2::theme_void()
+    }
+  }
+
+  if (plot) print(p)
 
   if (verbose) {
     message("\n********************************************************************************")
@@ -115,8 +146,6 @@ check_endemic_atlantic_ants <- function(comm, verbose = TRUE, plot = TRUE, valid
     } else {
       message("No species from the Atlantic Forest endemic list were detected in this community.")
     }
-
-    # --- REFERENCE  ---
     message("\nDATA SOURCE AND REFERENCE:")
     message("The endemic species list is sourced from:")
     message("Silva, N. S., Goncalves, D. C. de O., Wazema, C. T., Barbosa, D. A., Prado, L. P. do,")
@@ -127,7 +156,5 @@ check_endemic_atlantic_ants <- function(comm, verbose = TRUE, plot = TRUE, valid
     message("********************************************************************************")
   }
 
-  if (plot) print(p1)
-
-  invisible(list(table = endemicas_detectadas, plot = p1))
+  invisible(list(table = endemicas_detectadas, plot = p))
 }

@@ -18,32 +18,16 @@ assign_guild_ants(
 \item{verbose}{Logical; if \code{TRUE}, displays progress messages.}
 
 \item{plot}{Logical; if \code{TRUE}, displays guild proportion plots.}
+
+\item{validate}{Logical; if \code{TRUE}, validates species names using GBIF before analysis.}
+
+\item{delay}{Numeric; seconds to wait between GBIF API calls when \code{validate = TRUE}.}
 }
 \value{
 Invisibly returns a list with two elements:
-\item{table}{A data frame containing species, abundance, percentage, and guild assignments from each system (AntClassify, Silva, Delabie, Silvestre).}
+\item{table}{A data frame containing species, abundance, percentage, and guild assignments from each system.}
 \item{plots}{A list of four ggplot2 objects, one for each guild classification system.}
 }
 \description{
 Classifies ants into functional guilds using four different ecological databases.
-}
-\examples{
-\donttest{
-# Create a small example community matrix
-species_list <- c(
-  "Pachycondyla striata", "Pheidole gertrudae", "Solenopsis saevissima",
-  "Strumigenys denticulata", "Wasmannia auropunctata", "Nylanderia fulva",
-  "Odontomachus affinis", "Hypoponera foreli", "Hypoponera sp",
-  "Ectatomma edentatum", "Acanthognathus rudis", "Acromyrmex subterraneus"
-)
-set.seed(123)
-comm_data <- matrix(
-  rpois(length(species_list) * 3, lambda = 2),
-  nrow = 3,
-  ncol = length(species_list),
-  dimnames = list(paste0("sample", 1:3), species_list)
-)
-result <- assign_guild_ants(comm_data, verbose = FALSE, plot = FALSE)
-head(result$table)
-}
 }

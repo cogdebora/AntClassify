@@ -8,7 +8,7 @@
 #' @param comm A community matrix (rows = sites, columns = species).
 #' @param verbose Logical; if TRUE, displays progress messages.
 #' @param delay Numeric; seconds to wait between API calls (default 0.5).
-#'
+#' @importFrom utils URLencode
 #' @return A community matrix with updated column names (accepted names when available).
 #' @export
 #'
@@ -67,7 +67,7 @@ validate_species_names <- function(comm, verbose = TRUE, delay = 0.5) {
     warning(sprintf("%d species name(s) could not be validated by GBIF: %s",
                     length(unresolved), paste(unresolved, collapse = ", ")))
     if (verbose) {
-      message("\n⚠️ ATTENTION: The following names were not found or are no longer current:")
+      message("\n*** ATTENTION: The following names were not found or are no longer current:")
       for (p in unresolved) message("   - ", p)
       message("   Please verify these names manually before proceeding.")
     }

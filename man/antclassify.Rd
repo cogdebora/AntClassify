@@ -4,13 +4,21 @@
 \alias{antclassify}
 \title{AntClassify Full Ecological Pipeline}
 \usage{
-antclassify(comm)
+antclassify(comm, verbose = TRUE, plot = TRUE, validate = TRUE, delay = 0.5)
 }
 \arguments{
-\item{comm}{Community matrix (samples x species).}
+\item{comm}{Community matrix (samples x species). Species names as columns, samples as rows.}
+
+\item{verbose}{Logical; if TRUE, displays progress messages.}
+
+\item{plot}{Logical; if TRUE, displays guild proportion plots (passed to assign_guild_ants).}
+
+\item{validate}{Logical; if TRUE, validates species names using GBIF.}
+
+\item{delay}{Numeric; seconds between API calls (if validate = TRUE).}
 }
 \value{
-A list containing results from all analyses.
+A list containing results from all analyses (guilds, exotic, endemic, rarity).
 }
 \description{
 Runs all ecological classification functions of the package.

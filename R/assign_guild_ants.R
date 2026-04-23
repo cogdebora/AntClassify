@@ -3,38 +3,22 @@
 #' @param comm A community matrix where species are columns and samples are rows.
 #' @param verbose Logical; if \code{TRUE}, displays progress messages.
 #' @param plot Logical; if \code{TRUE}, displays guild proportion plots.
+#' @param validate Logical; if \code{TRUE}, validates species names using GBIF before analysis.
+#' @param delay Numeric; seconds to wait between GBIF API calls when \code{validate = TRUE}.
 #' @importFrom dplyr group_by summarise mutate
-#' @importFrom ggplot2 ggplot aes geom_col coord_flip labs theme_minimal theme scale_y_continuous scale_x_discrete element_text
+#' @importFrom ggplot2 ggplot aes geom_col coord_flip labs theme_classic theme element_text element_blank element_line scale_y_continuous scale_x_discrete
 #' @importFrom stringr str_split_fixed str_wrap
 #' @importFrom stats reorder
-#' @importFrom scales percent
+#' @importFrom scales percent_format
 #' @importFrom magrittr %>%
 #' @importFrom rlang sym
 #' @importFrom utils head
 #' @return Invisibly returns a list with two elements:
-#'   \item{table}{A data frame containing species, abundance, percentage, and guild assignments from each system (AntClassify, Silva, Delabie, Silvestre).}
+#'   \item{table}{A data frame containing species, abundance, percentage, and guild assignments from each system.}
 #'   \item{plots}{A list of four ggplot2 objects, one for each guild classification system.}
-#' @examples
-#' \donttest{
-#' # Create a small example community matrix
-#' species_list <- c(
-#'   "Pachycondyla striata", "Pheidole gertrudae", "Solenopsis saevissima",
-#'   "Strumigenys denticulata", "Wasmannia auropunctata", "Nylanderia fulva",
-#'   "Odontomachus affinis", "Hypoponera foreli", "Hypoponera sp",
-#'   "Ectatomma edentatum", "Acanthognathus rudis", "Acromyrmex subterraneus"
-#' )
-#' set.seed(123)
-#' comm_data <- matrix(
-#'   rpois(length(species_list) * 3, lambda = 2),
-#'   nrow = 3,
-#'   ncol = length(species_list),
-#'   dimnames = list(paste0("sample", 1:3), species_list)
-#' )
-#' result <- assign_guild_ants(comm_data, verbose = FALSE, plot = FALSE)
-#' head(result$table)
-#' }
 #' @export
 assign_guild_ants <- function(comm, verbose = TRUE, plot = TRUE, validate = TRUE, delay = 0.5) {
+
   # Optional validation of species names using GBIF
   if (isTRUE(validate)) {
     comm <- validate_species_names(comm, verbose = verbose, delay = delay)
@@ -70,6 +54,8 @@ assign_guild_ants <- function(comm, verbose = TRUE, plot = TRUE, validate = TRUE
   }
 
   if (verbose) message("Step 3: Generating plots...")
+
+  # Função interna para criar gráficos com o novo estilo
   create_plot <- function(data, guild_col, title_text) {
     res <- data %>%
       dplyr::group_by(!!rlang::sym(guild_col)) %>%
@@ -77,19 +63,27 @@ assign_guild_ants <- function(comm, verbose = TRUE, plot = TRUE, validate = TRUE
       dplyr::mutate(prop = total / sum(total))
 
     ggplot2::ggplot(res, ggplot2::aes(x = stats::reorder(!!rlang::sym(guild_col), prop), y = prop, fill = !!rlang::sym(guild_col))) +
-      ggplot2::geom_col() +
+      ggplot2::geom_col(color = "black", width = 0.7) +
       ggplot2::coord_flip() +
-      ggplot2::scale_y_continuous(labels = scales::percent) +
-      ggplot2::scale_x_discrete(labels = function(x) stringr::str_wrap(x, width = 40)) +
+      ggplot2::scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+      ggplot2::scale_x_discrete(labels = function(x) stringr::str_wrap(x, width = 45)) +
       ggplot2::labs(title = title_text, x = "Functional Guild", y = "Proportion") +
-      ggplot2::theme_minimal() +
-      ggplot2::theme(legend.position = "none", axis.text.y = ggplot2::element_text(size = 9))
+      ggplot2::theme_classic() +
+      ggplot2::theme(
+        legend.position = "none",
+        axis.text.y = ggplot2::element_text(size = 9),
+        axis.text.x = ggplot2::element_text(size = 9),
+        axis.title = ggplot2::element_text(size = 11),
+        plot.title = ggplot2::element_text(hjust = 0.5, size = 12, face = "bold"),
+        panel.grid = ggplot2::element_blank(),
+        axis.line = ggplot2::element_line(color = "black")
+      )
   }
 
-  p1 <- create_plot(df, "antclassify_guild", "AntClassify Guilds")
-  p2 <- create_plot(df, "silva_guild", "Poneromorph Functional Guilds (Silva et al., 2015)")
-  p3 <- create_plot(df, "delabie_guild", "Atlantic Forest Functional Guilds (Delabie et al., 2000)")
-  p4 <- create_plot(df, "silvestre_guild", "Cerrado Functional Guilds (Silvestre et al., 2003)")
+  p1 <- create_plot(df, "antclassify_guild", "Functional Guilds - AntClassify")
+  p2 <- create_plot(df, "silva_guild", "Functional Guilds - Silva et al. (2015)")
+  p3 <- create_plot(df, "delabie_guild", "Functional Guilds - Delabie et al. (2000)")
+  p4 <- create_plot(df, "silvestre_guild", "Functional Guilds - Silvestre et al. (2003)")
 
   if (plot) {
     print(p1)
@@ -103,29 +97,26 @@ assign_guild_ants <- function(comm, verbose = TRUE, plot = TRUE, validate = TRUE
     message("IMPORTANT NOTICE:")
     message("Please verify all assigned guilds. 'Unidentified Guild' indicates that the")
     message("taxon was not found in the available reference databases.\n")
-
     message("Guild classification in this analysis follows:")
     message("- Literature-based criteria from:\n")
-
     message("  Silvestre, R., Brand\u00e3o, C. R. F., & Silva, R. R. (2003). ")
     message("  Grupos funcionales de hormigas: el caso de los gremios del Cerrado. ")
     message("  In F. Fern\u00e1ndez (Ed.), *Introducci\u00f3n a las Hormigas de las Regi\u00f3n Neotropical* ")
     message("  (pp. 113-148). Instituto Alexander Von Humboldt.\n")
-
     message("  Silva, R. R., Silvestre, R., Brand\u00e3o, C. R. F., Morini, M. S. C., & Delabie, J. H. C. (2015). ")
     message("  Grupos tr\u00f3ficos e guildas em formigas poneromorfas. In: Delabie, J. H. C. et al. ")
     message("  *As formigas poneromorfas do Brasil*. Ilh\u00e9us: Editus, 2015. p. 163-179.\n")
-
     message("  Delabie, J. H. C., Agosti, D., & Nascimento, I. C. (2000). ")
     message("  Litter ant communities of the Brazilian Atlantic rain forest region. ")
     message("  *Sampling Ground-dwelling Ants: case studies from the world's rain forests. ")
     message("  Curtin University of Technology School of Environmental Biology Bulletin*, v. 18.\n")
-
     message("- The 'AntClassify Guilds' classification corresponds to the internal")
     message("  classification system implemented in the AntClassify package.\n")
-
     message("********************************************************************************")
   }
 
   invisible(list(table = df, plots = list(p1, p2, p3, p4)))
 }
+
+
+

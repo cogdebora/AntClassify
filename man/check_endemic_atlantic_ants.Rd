@@ -8,6 +8,7 @@ check_endemic_atlantic_ants(
   comm,
   verbose = TRUE,
   plot = TRUE,
+  plot_type = c("status", "species"),
   validate = TRUE,
   delay = 0.5
 )
@@ -17,29 +18,21 @@ check_endemic_atlantic_ants(
 
 \item{verbose}{Logical; if \code{TRUE}, displays progress messages.}
 
-\item{plot}{Logical; if \code{TRUE}, displays the plot of endemic vs. other species proportions.}
+\item{plot}{Logical; if \code{TRUE}, displays a plot (type controlled by \code{plot_type}).}
+
+\item{plot_type}{Character; type of plot to display. \code{"status"} (default) shows a bar plot comparing
+endemic vs. other species abundance proportions. \code{"species"} shows a bar plot of individual endemic
+species abundances as a proportion of the total community.}
+
+\item{validate}{Logical; if \code{TRUE}, validates species names using GBIF before analysis.}
+
+\item{delay}{Numeric; seconds to wait between GBIF API calls when \code{validate = TRUE}.}
 }
 \value{
 Invisibly returns a list with two elements:
 \item{table}{A data frame containing endemic species detected, with columns species, abundance, and percentage.}
-\item{plot}{A ggplot2 object showing the proportion of endemic vs. other species.}
+\item{plot}{A ggplot2 object.}
 }
 \description{
 Checks a community matrix for ant species endemic to the Brazilian Atlantic Forest based on Silva et al. (2025).
-}
-\examples{
-# Create a small example community matrix
-species_list <- c(
-  "Camponotus fallatus", "Solenopsis saevissima", "Hypoponera leninei",
-  "Pachycondyla striata", "Pheidole megacephala"
-)
-set.seed(123)
-comm_data <- matrix(
-  rpois(length(species_list) * 3, lambda = 2),
-  nrow = 3,
-  ncol = length(species_list),
-  dimnames = list(paste0("sample", 1:3), species_list)
-)
-result <- check_endemic_atlantic_ants(comm_data, verbose = FALSE, plot = FALSE)
-head(result$table)
 }
