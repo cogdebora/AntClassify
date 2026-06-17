@@ -36,6 +36,7 @@ check_endemic_atlantic_ants <- function(comm, verbose = TRUE, plot = TRUE,
 
   if (verbose) message("Step 1: Preparing community data...")
 
+  # Internal endemic species list (Atlantic Forest)
   endemic_list <- c(
     "Acanthostichus flexuosus", "Apterostigma serratum", "Brachymyrmex delabiei",
     "Brachymyrmex feitosai", "Camponotus fallatus", "Camponotus hermanni",
@@ -56,35 +57,39 @@ check_endemic_atlantic_ants <- function(comm, verbose = TRUE, plot = TRUE,
     "Typhlomyrmex lavra"
   )
 
-  dados_numericos <- as.data.frame(comm)
-  nomes_limpos <- trimws(gsub("_", " ", gsub("\\.", " ", colnames(dados_numericos))))
-  colnames(dados_numericos) <- nomes_limpos
+  # Prepare community data
+  numeric_data <- as.data.frame(comm)
+  clean_names <- trimws(gsub("_", " ", gsub("\\.", " ", colnames(numeric_data))))
+  colnames(numeric_data) <- clean_names
 
-  total_abs <- sum(colSums(dados_numericos, na.rm = TRUE))
+  total_abundance <- sum(colSums(numeric_data, na.rm = TRUE))
 
-  df <- data.frame(
-    species = colnames(dados_numericos),
-    abundance = as.numeric(colSums(dados_numericos, na.rm = TRUE)),
+  # Create species data frame
+  species_df <- data.frame(
+    species = colnames(numeric_data),
+    abundance = as.numeric(colSums(numeric_data, na.rm = TRUE)),
     stringsAsFactors = FALSE
   )
 
-  df$percentage <- (df$abundance / total_abs) * 100
-  df$status <- ifelse(df$species %in% endemic_list, "Endemic (AF)", "Other/Not Listed")
+  species_df$percentage <- (species_df$abundance / total_abundance) * 100
+  species_df$status <- ifelse(species_df$species %in% endemic_list, "Endemic (AF)", "Other/Not Listed")
 
   if (verbose) message("Step 2: Generating results...")
 
-  res_plot <- dplyr::group_by(df, status)
-  res_plot <- dplyr::summarise(res_plot, total = sum(abundance), .groups = "drop")
-  res_plot <- dplyr::mutate(res_plot, prop = total / sum(total))
+  # Prepare data for status plot
+  plot_data <- dplyr::group_by(species_df, status)
+  plot_data <- dplyr::summarise(plot_data, total = sum(abundance), .groups = "drop")
+  plot_data <- dplyr::mutate(plot_data, prop = total / sum(total))
 
-  endemicas_detectadas <- df[df$status == "Endemic (AF)", ]
-  rownames(endemicas_detectadas) <- NULL
+  # Identify endemic species
+  endemic_species <- species_df[species_df$status == "Endemic (AF)", ]
+  rownames(endemic_species) <- NULL
 
-  # --- Generate plot based on plot_type (ALWAYS create) ---
+  # --- Generate plot based on plot_type ---
   p <- NULL
 
   if (plot_type == "status") {
-    p <- ggplot2::ggplot(res_plot, ggplot2::aes(x = stats::reorder(status, prop), y = prop, fill = status)) +
+    p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = stats::reorder(status, prop), y = prop, fill = status)) +
       ggplot2::geom_col(color = "black", width = 0.7) +
       ggplot2::scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
       ggplot2::scale_fill_manual(values = c("Endemic (AF)" = "#2c7bb6", "Other/Not Listed" = "#abd9e9")) +
@@ -104,9 +109,9 @@ check_endemic_atlantic_ants <- function(comm, verbose = TRUE, plot = TRUE,
         axis.line = ggplot2::element_line(color = "black")
       )
   } else { # plot_type == "species"
-    if (nrow(endemicas_detectadas) > 0) {
-      endemic_plot_data <- endemicas_detectadas
-      endemic_plot_data$prop_community <- endemic_plot_data$abundance / total_abs
+    if (nrow(endemic_species) > 0) {
+      endemic_plot_data <- endemic_species
+      endemic_plot_data$prop_community <- endemic_plot_data$abundance / total_abundance
 
       p <- ggplot2::ggplot(
         endemic_plot_data,
@@ -138,23 +143,24 @@ check_endemic_atlantic_ants <- function(comm, verbose = TRUE, plot = TRUE,
 
   if (plot) print(p)
 
+  # Short message with references (without full citations)
   if (verbose) {
     message("\n********************************************************************************")
-    if (nrow(endemicas_detectadas) > 0) {
+    if (nrow(endemic_species) > 0) {
       message("ENDEMIC SPECIES DETECTED (ATLANTIC FOREST):")
-      print(endemicas_detectadas[, c("species", "abundance", "percentage")])
+      print(endemic_species[, c("species", "abundance", "percentage")])
     } else {
       message("No species from the Atlantic Forest endemic list were detected in this community.")
     }
-    message("\nDATA SOURCE AND REFERENCE:")
-    message("The endemic species list is sourced from:")
+    message("\nDATA SOURCE:")
     message("Silva, N. S., Goncalves, D. C. de O., Wazema, C. T., Barbosa, D. A., Prado, L. P. do,")
     message("Andrade-Silva, J., Fernandes, T. T., Silva, R. R., & Morini, M. S. de C. (2025).")
     message("'Endemism and vulnerability of ants in the phytophysiognomies of the Brazilian")
-    message("Atlantic Forest'. In: Brazilian Myrmecology: Exploring the World\u2019s Richest Ant Fauna")
+    message("Atlantic Forest'. In: Brazilian Myrmecology: Exploring the World's Richest Ant Fauna")
     message("(Chapter 16). Editora Cientifica Digital. DOI: 10.37885/250920259.")
+    message("Full reference available in the package documentation: ?check_endemic_atlantic_ants")
     message("********************************************************************************")
   }
 
-  invisible(list(table = endemicas_detectadas, plot = p))
+  invisible(list(table = endemic_species, plot = p))
 }

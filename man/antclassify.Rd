@@ -23,3 +23,19 @@ A list containing results from all analyses (guilds, exotic, endemic, rarity).
 \description{
 Runs all ecological classification functions of the package.
 }
+\examples{
+\dontrun{
+# Load the built-in example dataset
+data(ant_community)
+
+# Run the full pipeline (validation disabled for speed)
+results <- antclassify(ant_community, validate = FALSE, plot = FALSE)
+
+# Inspect the results
+names(results)
+head(results$guilds$table)
+results$exotic$table
+results$endemic$table
+results$rarity$table
+}
+}

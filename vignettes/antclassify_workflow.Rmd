@@ -1,11 +1,12 @@
 ---
 
-itle: "AntClassify"
+title: "AntClassify: An R Package for Standardized Classification of Ant Communities, Functional Guilds, Endemism, and Rarity"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{antclassify_workflow}
+  %\VignetteIndexEntry{AntClassify: Classification of Ant Communities}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+
 ---
 
 ```{r, include = FALSE}

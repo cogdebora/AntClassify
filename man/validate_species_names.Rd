@@ -2,7 +2,7 @@
 % Please edit documentation in R/validate_species_names.R
 \name{validate_species_names}
 \alias{validate_species_names}
-\title{Validate species names using GBIF API}
+\title{Validate Species Names Using GBIF API}
 \usage{
 validate_species_names(comm, verbose = TRUE, delay = 0.5)
 }

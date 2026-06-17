@@ -33,7 +33,7 @@ AntClassify aims to provide a standardized and reproducible framework for advanc
 To demonstrate the functionality of the package, we create a more realistic ant community dataset.
 
 ```{r}
-dados <- data.frame(
+data <- data.frame(
   Atta_sexdens = 50,
   Camponotus_atriceps = 40,
   Crematogaster_sp = 35,
@@ -73,7 +73,7 @@ dados <- data.frame(
 
 colnames(dados) <- gsub("_", " ", colnames(dados))
 
-dados
+data
 ```
 
 ## Running the pipeline
@@ -81,7 +81,7 @@ dados
 The main function of the package, `antclassify()`, runs the full ecological workflow.
 
 ```{r}
-resultado <- antclassify(dados)
+results <- antclassify(data)
 ```
 
 ## Accessing results
@@ -89,6 +89,6 @@ resultado <- antclassify(dados)
 You can access each component of the results:
 
 ```{r}
-names(resultado)
-head(resultado$guilds$table)
+names(results)
+head(results$guilds$table)
 ```

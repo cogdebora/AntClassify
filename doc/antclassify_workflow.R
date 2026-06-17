@@ -8,7 +8,7 @@ knitr::opts_chunk$set(
 library(AntClassify)
 
 ## -----------------------------------------------------------------------------
-dados <- data.frame(
+data <- data.frame(
   Atta_sexdens = 50,
   Camponotus_atriceps = 40,
   Crematogaster_sp = 35,
@@ -46,14 +46,13 @@ dados <- data.frame(
   Diaphoromyrma_sofiae = 1
 )
 
-colnames(dados) <- gsub("_", " ", colnames(dados))
+colnames(data) <- gsub("_", " ", colnames(data))
 
-dados
-
-## -----------------------------------------------------------------------------
-resultado <- antclassify(dados)
+data
 
 ## -----------------------------------------------------------------------------
-names(resultado)
-head(resultado$guilds$table)
+results <- antclassify(data)
 
+## -----------------------------------------------------------------------------
+names(results)
+head(results$guilds$table)

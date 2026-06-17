@@ -27,6 +27,7 @@ check_exotic_ants <- function(comm, verbose = TRUE, plot = TRUE, plot_type = c("
 
   if (verbose) message("Step 1: Preparing community data...")
 
+  # Internal exotic species list (Brazil)
   exotic_list <- c(
     "Tapinoma melanocephalum", "Technomyrmex vitiensis", "Paratrechina longicornis",
     "Cardiocondyla emeryi", "Cardiocondyla minutior", "Cardiocondyla obscurior",
@@ -37,35 +38,39 @@ check_exotic_ants <- function(comm, verbose = TRUE, plot = TRUE, plot_type = c("
     "Leptogenys maxillosa"
   )
 
-  dados_numericos <- as.data.frame(comm)
-  nomes_limpos <- trimws(gsub("_", " ", gsub("\\.", " ", colnames(dados_numericos))))
-  colnames(dados_numericos) <- nomes_limpos
+  # Prepare community data
+  numeric_data <- as.data.frame(comm)
+  clean_names <- trimws(gsub("_", " ", gsub("\\.", " ", colnames(numeric_data))))
+  colnames(numeric_data) <- clean_names
 
-  total_abs <- sum(colSums(dados_numericos, na.rm = TRUE))
+  total_abundance <- sum(colSums(numeric_data, na.rm = TRUE))
 
-  df <- data.frame(
-    species = colnames(dados_numericos),
-    abundance = as.numeric(colSums(dados_numericos, na.rm = TRUE)),
+  # Create species data frame
+  species_df <- data.frame(
+    species = colnames(numeric_data),
+    abundance = as.numeric(colSums(numeric_data, na.rm = TRUE)),
     stringsAsFactors = FALSE
   )
 
-  df$percentage <- (df$abundance / total_abs) * 100
-  df$origin <- ifelse(df$species %in% exotic_list, "Exotic", "Native/Not Listed")
+  species_df$percentage <- (species_df$abundance / total_abundance) * 100
+  species_df$origin <- ifelse(species_df$species %in% exotic_list, "Exotic", "Native/Not Listed")
 
   if (verbose) message("Step 2: Generating results...")
 
-  res_plot <- dplyr::group_by(df, origin)
-  res_plot <- dplyr::summarise(res_plot, total = sum(abundance), .groups = "drop")
-  res_plot <- dplyr::mutate(res_plot, prop = total / sum(total))
+  # Prepare data for status plot
+  plot_data <- dplyr::group_by(species_df, origin)
+  plot_data <- dplyr::summarise(plot_data, total = sum(abundance), .groups = "drop")
+  plot_data <- dplyr::mutate(plot_data, prop = total / sum(total))
 
-  exoticas_detectadas <- df[df$origin == "Exotic", ]
-  rownames(exoticas_detectadas) <- NULL
+  # Identify exotic species
+  exotic_species <- species_df[species_df$origin == "Exotic", ]
+  rownames(exotic_species) <- NULL
 
-  # --- Generate plot based on plot_type (ALWAYS create) ---
+  # --- Generate plot based on plot_type ---
   p <- NULL
 
   if (plot_type == "status") {
-    p <- ggplot2::ggplot(res_plot, ggplot2::aes(x = stats::reorder(origin, prop), y = prop, fill = origin)) +
+    p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = stats::reorder(origin, prop), y = prop, fill = origin)) +
       ggplot2::geom_col(color = "black", width = 0.7) +
       ggplot2::scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
       ggplot2::scale_fill_manual(values = c("Exotic" = "#d95f02", "Native/Not Listed" = "#1b9e77")) +
@@ -85,9 +90,9 @@ check_exotic_ants <- function(comm, verbose = TRUE, plot = TRUE, plot_type = c("
         axis.line = ggplot2::element_line(color = "black")
       )
   } else { # plot_type == "species"
-    if (nrow(exoticas_detectadas) > 0) {
-      exotic_plot_data <- exoticas_detectadas
-      exotic_plot_data$prop_community <- exotic_plot_data$abundance / total_abs
+    if (nrow(exotic_species) > 0) {
+      exotic_plot_data <- exotic_species
+      exotic_plot_data$prop_community <- exotic_plot_data$abundance / total_abundance
 
       p <- ggplot2::ggplot(
         exotic_plot_data,
@@ -119,21 +124,21 @@ check_exotic_ants <- function(comm, verbose = TRUE, plot = TRUE, plot_type = c("
 
   if (plot) print(p)
 
+  # Short message with references (without full citations)
   if (verbose) {
     message("\n********************************************************************************")
-    if (nrow(exoticas_detectadas) > 0) {
+    if (nrow(exotic_species) > 0) {
       message("EXOTIC SPECIES DETECTED:")
-      print(exoticas_detectadas[, c("species", "abundance", "percentage")])
+      print(exotic_species[, c("species", "abundance", "percentage")])
     } else {
       message("No exotic species from the target list were detected in this community.")
     }
-    message("\nDATA SOURCE AND REFERENCE:")
-    message("The exotic species list used in this function is sourced from:")
-    message("VIEIRA, Vitoria Brunetta. 'Quem s\u00e3o e onde est\u00e3o as formigas ex\u00f3ticas do Brasil?'")
-    message("Dissertacao (Mestrado em Entomologia) \u2013 Universidade Federal do Parana (UFPR),")
-    message("Curitiba, Brasil, 2025.")
+    message("\nDATA SOURCE:")
+    message("Vieira, V. B. (2025). 'Quem s\u00e3o e onde est\u00e3o as formigas ex\u00f3ticas do Brasil?'")
+    message("Master's thesis, Universidade Federal do Paran\u00e1, Curitiba, Brazil.")
+    message("Full reference available in the package documentation: ?check_exotic_ants")
     message("********************************************************************************")
   }
 
-  invisible(list(table = exoticas_detectadas, plot = p))
+  invisible(list(table = exotic_species, plot = p))
 }

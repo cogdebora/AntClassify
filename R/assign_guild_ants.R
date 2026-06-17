@@ -25,44 +25,55 @@ assign_guild_ants <- function(comm, verbose = TRUE, plot = TRUE, validate = TRUE
   }
 
   if (verbose) message("Step 1: Preparing community data...")
-  dados_numericos <- as.data.frame(comm)
-  colnames(dados_numericos) <- trimws(gsub("[._]", " ", colnames(dados_numericos)))
-  total_abs <- sum(colSums(dados_numericos, na.rm = TRUE))
 
-  df <- data.frame(
-    species = colnames(dados_numericos),
-    abundance = colSums(dados_numericos, na.rm = TRUE),
+  # Convert community matrix to data frame and clean column names
+  numeric_data <- as.data.frame(comm)
+  colnames(numeric_data) <- trimws(gsub("[._]", " ", colnames(numeric_data)))
+
+  # Calculate total abundance
+  total_abundance <- sum(colSums(numeric_data, na.rm = TRUE))
+
+  # Create species data frame
+  species_df <- data.frame(
+    species = colnames(numeric_data),
+    abundance = colSums(numeric_data, na.rm = TRUE),
     stringsAsFactors = FALSE
   )
-  df$percentage <- (df$abundance / total_abs) * 100
-  genus_list <- stringr::str_split_fixed(df$species, pattern = " ", n = 2)[, 1]
+  species_df$percentage <- (species_df$abundance / total_abundance) * 100
+
+  # Extract genus names from species names (first word only)
+  genus_list <- stringr::str_split_fixed(species_df$species, pattern = " ", n = 2)[, 1]
 
   if (verbose) message("Step 2: Matching species to functional guilds...")
-  df$antclassify_guild <- generic_db$guild[match(genus_list, generic_db$target)]
-  df$silva_guild <- silva_db$guild[match(df$species, silva_db$target)]
-  df$silva_guild[is.na(df$silva_guild)] <- silva_db$guild[match(genus_list[is.na(df$silva_guild)], silva_db$target)]
-  df$delabie_guild <- delabie_db$guild[match(genus_list, delabie_db$target)]
-  df$silvestre_guild <- silvestre_db$guild[match(df$species, silvestre_db$target)]
-  df$silvestre_guild[is.na(df$silvestre_guild)] <- silvestre_db$guild[match(genus_list[is.na(df$silvestre_guild)], silvestre_db$target)]
 
+  # Assign guilds from each classification system
+  species_df$antclassify_guild <- generic_db$guild[match(genus_list, generic_db$target)]
+  species_df$silva_guild <- silva_db$guild[match(species_df$species, silva_db$target)]
+  species_df$silva_guild[is.na(species_df$silva_guild)] <- silva_db$guild[match(genus_list[is.na(species_df$silva_guild)], silva_db$target)]
+  species_df$delabie_guild <- delabie_db$guild[match(genus_list, delabie_db$target)]
+  species_df$silvestre_guild <- silvestre_db$guild[match(species_df$species, silvestre_db$target)]
+  species_df$silvestre_guild[is.na(species_df$silvestre_guild)] <- silvestre_db$guild[match(genus_list[is.na(species_df$silvestre_guild)], silvestre_db$target)]
+
+  # Replace NA with "Unidentified Guild"
   guild_cols <- c("antclassify_guild", "silva_guild", "delabie_guild", "silvestre_guild")
-  df[guild_cols] <- lapply(df[guild_cols], function(x) ifelse(is.na(x), "Unidentified Guild", x))
+  species_df[guild_cols] <- lapply(species_df[guild_cols], function(x) ifelse(is.na(x), "Unidentified Guild", x))
 
+  # Show first 6 rows of results
   if (verbose) {
     message("\nGuild classification results (first 6 rows):")
-    print(head(df))
+    print(head(species_df))
   }
 
   if (verbose) message("Step 3: Generating plots...")
 
-  # Função interna para criar gráficos com o novo estilo
+  # Internal function to create plots
   create_plot <- function(data, guild_col, title_text) {
-    res <- data %>%
+    plot_data <- data %>%
       dplyr::group_by(!!rlang::sym(guild_col)) %>%
       dplyr::summarise(total = sum(abundance), .groups = "drop") %>%
       dplyr::mutate(prop = total / sum(total))
 
-    ggplot2::ggplot(res, ggplot2::aes(x = stats::reorder(!!rlang::sym(guild_col), prop), y = prop, fill = !!rlang::sym(guild_col))) +
+    ggplot2::ggplot(plot_data, ggplot2::aes(x = stats::reorder(!!rlang::sym(guild_col), prop), y = prop, fill = !!rlang::sym(guild_col))) +
       ggplot2::geom_col(color = "black", width = 0.7) +
       ggplot2::coord_flip() +
       ggplot2::scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
@@ -80,11 +91,13 @@ assign_guild_ants <- function(comm, verbose = TRUE, plot = TRUE, validate = TRUE
       )
   }
 
-  p1 <- create_plot(df, "antclassify_guild", "Functional Guilds - AntClassify")
-  p2 <- create_plot(df, "silva_guild", "Functional Guilds - Silva et al. (2015)")
-  p3 <- create_plot(df, "delabie_guild", "Functional Guilds - Delabie et al. (2000)")
-  p4 <- create_plot(df, "silvestre_guild", "Functional Guilds - Silvestre et al. (2003)")
+  # Generate plots for each classification system
+  p1 <- create_plot(species_df, "antclassify_guild", "Functional Guilds - AntClassify")
+  p2 <- create_plot(species_df, "silva_guild", "Functional Guilds - Silva et al. (2015)")
+  p3 <- create_plot(species_df, "delabie_guild", "Functional Guilds - Delabie et al. (2000)")
+  p4 <- create_plot(species_df, "silvestre_guild", "Functional Guilds - Silvestre et al. (2003)")
 
+  # Print plots if requested
   if (plot) {
     print(p1)
     print(p2)
@@ -92,31 +105,13 @@ assign_guild_ants <- function(comm, verbose = TRUE, plot = TRUE, validate = TRUE
     print(p4)
   }
 
+  # Short message with references (without full citations)
   if (verbose) {
-    message("\n********************************************************************************")
-    message("IMPORTANT NOTICE:")
-    message("Please verify all assigned guilds. 'Unidentified Guild' indicates that the")
-    message("taxon was not found in the available reference databases.\n")
-    message("Guild classification in this analysis follows:")
-    message("- Literature-based criteria from:\n")
-    message("  Silvestre, R., Brand\u00e3o, C. R. F., & Silva, R. R. (2003). ")
-    message("  Grupos funcionales de hormigas: el caso de los gremios del Cerrado. ")
-    message("  In F. Fern\u00e1ndez (Ed.), *Introducci\u00f3n a las Hormigas de las Regi\u00f3n Neotropical* ")
-    message("  (pp. 113-148). Instituto Alexander Von Humboldt.\n")
-    message("  Silva, R. R., Silvestre, R., Brand\u00e3o, C. R. F., Morini, M. S. C., & Delabie, J. H. C. (2015). ")
-    message("  Grupos tr\u00f3ficos e guildas em formigas poneromorfas. In: Delabie, J. H. C. et al. ")
-    message("  *As formigas poneromorfas do Brasil*. Ilh\u00e9us: Editus, 2015. p. 163-179.\n")
-    message("  Delabie, J. H. C., Agosti, D., & Nascimento, I. C. (2000). ")
-    message("  Litter ant communities of the Brazilian Atlantic rain forest region. ")
-    message("  *Sampling Ground-dwelling Ants: case studies from the world's rain forests. ")
-    message("  Curtin University of Technology School of Environmental Biology Bulletin*, v. 18.\n")
-    message("- The 'AntClassify Guilds' classification corresponds to the internal")
-    message("  classification system implemented in the AntClassify package.\n")
-    message("********************************************************************************")
+    message("\nGuild classification sources: Delabie et al. (2000), Silvestre et al. (2003),\n",
+            "Silva et al. (2015), and AntClassify internal database.\n",
+            "Full citations are available in the package documentation: ?assign_guild_ants\n")
   }
 
-  invisible(list(table = df, plots = list(p1, p2, p3, p4)))
+  # Return results invisibly
+  invisible(list(table = species_df, plots = list(p1, p2, p3, p4)))
 }
-
-
-

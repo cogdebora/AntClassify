@@ -1,6 +1,5 @@
-#' Classify ant communities across multiple sites
-#'
-#' Applies the AntClassify pipeline to each site (row) of a community matrix
+#' @title Classify Ant Communities Across Multiple Sites
+#' @description Applies the AntClassify pipeline to each site (row) of a community matrix
 #' and returns aggregated guild abundance and richness matrices.
 #'
 #' @param comm A community matrix with sites as rows and species as columns.
@@ -34,10 +33,11 @@
 #'                                  "Solenopsis saevissima", "Nylanderia fulva")))
 #'
 #' # Run the classification (validate = FALSE to avoid GBIF calls in examples)
-#' res <- antclassify_community(comm, guild_col = "antclassify_guild",
-#'                              validate = FALSE)
-#' res$guild_abundance
-#' res$guild_richness
+#' results <- antclassify_community(comm, guild_col = "antclassify_guild",
+#'                                  validate = FALSE)
+#' results$guild_abundance
+#' results$guild_richness
+#' @export
 antclassify_community <- function(comm, guild_col = "antclassify_guild", ...) {
 
   # Input validation
@@ -69,54 +69,71 @@ antclassify_community <- function(comm, guild_col = "antclassify_guild", ...) {
 
     if (ncol(site_comm) == 0) {
       # Empty site -> return empty structures
-      empty_table <- data.frame(species = character(), abundance = numeric(),
-                                antclassify_guild = character(),
-                                silva_guild = character(),
-                                delabie_guild = character(),
-                                silvestre_guild = character(),
-                                stringsAsFactors = FALSE)
-      return(list(res = list(table = empty_table, plots = list()),
-                  guild_agg = data.frame(Guild = character(), abundance = numeric()),
-                  richness = 0L))
+      empty_table <- data.frame(
+        species = character(),
+        abundance = numeric(),
+        antclassify_guild = character(),
+        silva_guild = character(),
+        delabie_guild = character(),
+        silvestre_guild = character(),
+        percentage = numeric(),
+        stringsAsFactors = FALSE
+      )
+      return(list(
+        result = list(table = empty_table, plots = list()),
+        guild_aggregated = data.frame(Guild = character(), abundance = numeric()),
+        richness = 0L
+      ))
     }
 
     # Suppress plot printing inside assign_guild_ants
-    res <- assign_guild_ants(site_comm, plot = FALSE, ...)
-    tab <- res$table
+    result <- assign_guild_ants(site_comm, plot = FALSE, ...)
+    species_table <- result$table
 
     # Aggregate by chosen guild column
-    guild_agg <- stats::aggregate(tab$abundance,
-                                  by = list(Guild = tab[[guild_col]]),
-                                  FUN = sum)
-    colnames(guild_agg)[2] <- "abundance"
+    guild_aggregated <- stats::aggregate(
+      species_table$abundance,
+      by = list(Guild = species_table[[guild_col]]),
+      FUN = sum
+    )
+    colnames(guild_aggregated)[2] <- "abundance"
 
-    list(res = res,
-         guild_agg = guild_agg,
-         richness = nrow(guild_agg))
+    list(
+      result = result,
+      guild_aggregated = guild_aggregated,
+      richness = nrow(guild_aggregated)
+    )
   }
 
   site_results <- lapply(seq_len(n_sites), process_site)
 
   # Build output components
-  by_site <- lapply(site_results, `[[`, "res")
-  guild_richness <- vapply(site_results, `[[`, integer(1), "richness")
+  by_site <- lapply(site_results, function(x) x$result)
+  guild_richness <- vapply(site_results, function(x) x$richness, integer(1))
 
   # Gather all guild names
   all_guilds <- unique(unlist(
-    lapply(site_results, function(x) x$guild_agg$Guild)
+    lapply(site_results, function(x) x$guild_aggregated$Guild)
   ))
 
   # Build abundance matrix (sites x guilds)
-  guild_abundance <- matrix(0, nrow = n_sites, ncol = length(all_guilds),
-                            dimnames = list(rownames(comm), all_guilds))
+  guild_abundance <- matrix(
+    0,
+    nrow = n_sites,
+    ncol = length(all_guilds),
+    dimnames = list(rownames(comm), all_guilds)
+  )
+
   for (i in seq_len(n_sites)) {
-    g <- site_results[[i]]$guild_agg
-    if (nrow(g) > 0) {
-      guild_abundance[i, g$Guild] <- g$abundance
+    guild_data <- site_results[[i]]$guild_aggregated
+    if (nrow(guild_data) > 0) {
+      guild_abundance[i, guild_data$Guild] <- guild_data$abundance
     }
   }
 
-  list(by_site = by_site,
-       guild_abundance = guild_abundance,
-       guild_richness = guild_richness)
+  list(
+    by_site = by_site,
+    guild_abundance = guild_abundance,
+    guild_richness = guild_richness
+  )
 }

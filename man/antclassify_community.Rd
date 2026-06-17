@@ -2,7 +2,7 @@
 % Please edit documentation in R/antclassify_community.R
 \name{antclassify_community}
 \alias{antclassify_community}
-\title{Classify ant communities across multiple sites}
+\title{Classify Ant Communities Across Multiple Sites}
 \usage{
 antclassify_community(comm, guild_col = "antclassify_guild", ...)
 }
@@ -43,8 +43,8 @@ comm <- matrix(c(5, 0, 2, 0, 1, 3,
                                  "Solenopsis saevissima", "Nylanderia fulva")))
 
 # Run the classification (validate = FALSE to avoid GBIF calls in examples)
-res <- antclassify_community(comm, guild_col = "antclassify_guild",
-                             validate = FALSE)
-res$guild_abundance
-res$guild_richness
+results <- antclassify_community(comm, guild_col = "antclassify_guild",
+                                 validate = FALSE)
+results$guild_abundance
+results$guild_richness
 }

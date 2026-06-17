@@ -9,6 +9,22 @@
 #' @param delay Numeric; seconds between API calls (if validate = TRUE).
 #' @return A list containing results from all analyses (guilds, exotic, endemic, rarity).
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' # Load the built-in example dataset
+#' data(ant_community)
+#'
+#' # Run the full pipeline (validation disabled for speed)
+#' results <- antclassify(ant_community, validate = FALSE, plot = FALSE)
+#'
+#' # Inspect the results
+#' names(results)
+#' head(results$guilds$table)
+#' results$exotic$table
+#' results$endemic$table
+#' results$rarity$table
+#' }
 antclassify <- function(comm, verbose = TRUE, plot = TRUE, validate = TRUE, delay = 0.5) {
 
   if (verbose) message("*************************************************")
@@ -28,15 +44,15 @@ antclassify <- function(comm, verbose = TRUE, plot = TRUE, validate = TRUE, dela
 
   results <- list()
 
-  # Validate species names if requested (using the correct object name 'comm')
+  # Validate species names if requested
   if (isTRUE(validate)) {
     if (verbose) message("\n>>> Validating species names via GBIF")
     comm <- validate_species_names(comm, verbose = verbose, delay = delay)
   }
 
-  # Run guild classification
+  # Run guild classification (validation already done)
   if (verbose) message("\n>>> Running guild classification")
-  results$guilds <- assign_guild_ants(comm, verbose = verbose, plot = plot, validate = FALSE)  # validation already done
+  results$guilds <- assign_guild_ants(comm, verbose = verbose, plot = plot, validate = FALSE)
 
   # Run exotic check
   if (verbose) message("\n>>> Checking exotic species")

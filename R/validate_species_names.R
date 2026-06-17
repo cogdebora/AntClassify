@@ -1,4 +1,4 @@
-#' Validate species names using GBIF API
+#' Validate Species Names Using GBIF API
 #'
 #' Checks species names against the GBIF taxonomic backbone. If an exact match is found,
 #' the accepted name (or canonical name) is used. If no exact match is found, the
