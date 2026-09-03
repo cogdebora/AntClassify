@@ -1,8 +1,8 @@
 Package: AntClassify
 Type: Package
 Title: Functional Guilds, Invasion Status, Endemism, and Rarity of Ants
-Version: 0.2.2
-Date: 2026-05-06
+Version: 0.2.3
+Date: 2026-09-03
 Authors@R: c(person(given = "Débora C. O.", family = "Gonçalves", role = c("aut", "cre"), email = "debora_cog@outlook.com"), person(given = "Nathalia S.", family = "Silva", role = "aut"), person(given = "Rony P. S.", family = "Almeida", role = "aut"), person(given = "Lívia P.", family = "Prado", role = "aut"), person(given = "Maria S. C.", family = "Morini", role = "aut"))
 Description: Provides functions for the analysis of ant communities, aiming to
     standardize workflows in myrmecology. The package automates the assignment

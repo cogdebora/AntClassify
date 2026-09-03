@@ -19,6 +19,16 @@
 #' @export
 assign_guild_ants <- function(comm, verbose = TRUE, plot = TRUE, validate = TRUE, delay = 0.5) {
 
+  if (!is.data.frame(comm) && !is.matrix(comm)) {
+    stop("Error: input must be a data.frame or matrix.")
+  }
+
+  comm <- as.data.frame(comm)
+
+  if (!all(sapply(comm, is.numeric))) {
+    stop("Error: all columns should be numerical (species abundance).")
+  }
+
   # Optional validation of species names using GBIF
   if (isTRUE(validate)) {
     comm <- validate_species_names(comm, verbose = verbose, delay = delay)
@@ -36,7 +46,7 @@ assign_guild_ants <- function(comm, verbose = TRUE, plot = TRUE, validate = TRUE
   # Create species data frame
   species_df <- data.frame(
     species = colnames(numeric_data),
-    abundance = colSums(numeric_data, na.rm = TRUE),
+    abundance = as.numeric(colSums(numeric_data, na.rm = TRUE)),
     stringsAsFactors = FALSE
   )
   species_df$percentage <- (species_df$abundance / total_abundance) * 100
@@ -61,7 +71,7 @@ assign_guild_ants <- function(comm, verbose = TRUE, plot = TRUE, validate = TRUE
   # Show first 6 rows of results
   if (verbose) {
     message("\nGuild classification results (first 6 rows):")
-    print(head(species_df))
+    print(utils::head(species_df))
   }
 
   if (verbose) message("Step 3: Generating plots...")

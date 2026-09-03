@@ -20,17 +20,15 @@ library(AntClassify)
 
 ## Introduction
 
-The **AntClassify** package provides an integrated ecological pipeline to classify ant communities into functional guilds, identify exotic species, detect endemic and rare species of the Atlantic Forest, and quantify key ecological patterns.
+The AntClassify package provides an integrated ecological pipeline to classify ant communities into functional guilds, identify exotic species, detect endemic and rare species of the Atlantic Forest, and quantify key ecological patterns.
 
 This tool was developed to facilitate ecological analyses, standardize functional classification, and improve reproducibility in ant community studies. By integrating multiple ecological databases into a single workflow, AntClassify allows researchers to efficiently assess community structure, biological invasions, endemism, and rarity patterns.
 
 The package is particularly useful for biodiversity monitoring, conservation planning, and macroecological research involving ant assemblages.
 
-AntClassify aims to provide a standardized and reproducible framework for advancing ecological research on ant communities.
-
 ## Example dataset
 
-To demonstrate the functionality of the package, we create a more realistic ant community dataset.
+To demonstrate the functionality of the package, we create a ant community dataset containing 35 species.
 
 ```{r}
 data <- data.frame(
@@ -71,17 +69,17 @@ data <- data.frame(
   Diaphoromyrma_sofiae = 1
 )
 
-colnames(dados) <- gsub("_", " ", colnames(dados))
+colnames(data) <- gsub("_", " ", colnames(data))
 
 data
 ```
 
 ## Running the pipeline
 
-The main function of the package, `antclassify()`, runs the full ecological workflow.
+The main function antclassify() runs the complete workflow. To avoid long computation times, we set validate = FALSE and plot = FALSE.
 
 ```{r}
-results <- antclassify(data)
+results <- antclassify(data, validate = FALSE, plot = FALSE)
 ```
 
 ## Accessing results
@@ -91,4 +89,66 @@ You can access each component of the results:
 ```{r}
 names(results)
 head(results$guilds$table)
+```
+## Individual analyses
+
+If you need only one type of classification, you can run the corresponding function directly.
+
+## Functional guilds
+
+```{r}
+guild_results <- assign_guild_ants(data, validate = FALSE, plot = FALSE)
+head(guild_results$table)
+```
+
+## Exotic species
+
+```{r}
+rarity_results <- check_rarity_atlantic_ants(data, validate = FALSE, plot = FALSE)
+rarity_results$table
+```
+
+## Endemic species
+
+```{r}
+endemic_results <- check_endemic_atlantic_ants(data, validate = FALSE, plot = FALSE)
+endemic_results$table
+```
+
+## Rarity forms
+
+```{r}
+rarity_results <- check_rarity_atlantic_ants(data, validate = FALSE, plot = FALSE)
+rarity_results$table
+```
+
+## Generating plots
+
+To generate and display plots, set plot = TRUE and choose the desired plot_type.
+
+```{r}
+# Distribution of rarity forms (status)
+check_rarity_atlantic_ants(data, validate = FALSE, plot = TRUE, plot_type = "status")
+```
+
+```{r}
+# Rare species abundance by rarity form
+check_rarity_atlantic_ants(data, validate = FALSE, plot = TRUE, plot_type = "species")
+```
+## Accessing internal reference databases
+
+All internal classification tables are available via the data() function.
+
+```{r}
+data(generic_db)
+head(generic_db)
+
+data(rarity_db)
+head(rarity_db)
+
+data(exotic_db)
+head(exotic_db)
+
+data(endemic_db)
+head(endemic_db)
 ```

@@ -22,6 +22,16 @@ check_endemic_atlantic_ants <- function(comm, verbose = TRUE, plot = TRUE,
 
   plot_type <- match.arg(plot_type)
 
+  if (!is.data.frame(comm) && !is.matrix(comm)) {
+    stop("Error: input must be a data.frame or matrix.")
+  }
+
+  comm <- as.data.frame(comm)
+
+  if (!all(sapply(comm, is.numeric))) {
+    stop("Error: all columns should be numerical (species abundance).")
+  }
+
   if (isTRUE(validate)) {
     comm <- validate_species_names(comm, verbose = verbose, delay = delay)
   }

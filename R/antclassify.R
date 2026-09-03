@@ -35,7 +35,6 @@ antclassify <- function(comm, verbose = TRUE, plot = TRUE, validate = TRUE, dela
     stop("Error: input must be a data.frame or matrix.")
   }
 
-  # Convert to data.frame if matrix
   comm <- as.data.frame(comm)
 
   if (!all(sapply(comm, is.numeric))) {
@@ -44,27 +43,27 @@ antclassify <- function(comm, verbose = TRUE, plot = TRUE, validate = TRUE, dela
 
   results <- list()
 
-  # Validate species names if requested
+  # Validate species names once if requested
   if (isTRUE(validate)) {
     if (verbose) message("\n>>> Validating species names via GBIF")
     comm <- validate_species_names(comm, verbose = verbose, delay = delay)
   }
 
-  # Run guild classification (validation already done)
+  # Run guild classification (validation already handled above)
   if (verbose) message("\n>>> Running guild classification")
   results$guilds <- assign_guild_ants(comm, verbose = verbose, plot = plot, validate = FALSE)
 
-  # Run exotic check
+  # Run exotic check (no additional validation)
   if (verbose) message("\n>>> Checking exotic species")
-  results$exotic <- check_exotic_ants(comm, verbose = verbose, plot = plot)
+  results$exotic <- check_exotic_ants(comm, verbose = verbose, plot = plot, validate = FALSE)
 
-  # Run endemic check
+  # Run endemic check (no additional validation)
   if (verbose) message("\n>>> Checking Atlantic Forest endemic species")
-  results$endemic <- check_endemic_atlantic_ants(comm, verbose = verbose, plot = plot)
+  results$endemic <- check_endemic_atlantic_ants(comm, verbose = verbose, plot = plot, validate = FALSE)
 
-  # Run rarity check
+  # Run rarity check (no additional validation)
   if (verbose) message("\n>>> Checking Atlantic Forest rarity patterns")
-  results$rarity <- check_rarity_atlantic_ants(comm, verbose = verbose, plot = plot)
+  results$rarity <- check_rarity_atlantic_ants(comm, verbose = verbose, plot = plot, validate = FALSE)
 
   if (verbose) message("\n***********************************************")
   if (verbose) message("AntClassify finished successfully")
